@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>سراج · Agenticthon</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --purple:     #7C3AED;
+      --purple-d:   #6D28D9;
+      --purple-l:   #EDE9FE;
+      --purple-m:   #DDD6FE;
+      --purple-t:   rgba(124,58,237,0.08);
+      --bg:         #F5F3FF;
+      --surface:    #FFFFFF;
+      --text:       #1E1B4B;
+      --text2:      #4C1D95;
+      --muted:      #6B7280;
+      --border:     #E9D5FF;
+      --green:      #059669;
+      --green-l:    #ECFDF5;
+      --red:        #DC2626;
+      --shadow:     0 4px 24px rgba(124,58,237,0.12);
+      --shadow-lg:  0 8px 40px rgba(124,58,237,0.18);
+      --r:          18px;
+      --r-sm:       12px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Cairo', system-ui, sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem 1rem;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Background blobs */
+    body::before, body::after {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::before {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(124,58,237,0.12), transparent 70%);
+      top: -100px; right: -100px;
+    }
+    body::after {
+      width: 350px; height: 350px;
+      background: radial-gradient(circle, rgba(124,58,237,0.08), transparent 70%);
+      bottom: -80px; left: -80px;
+    }
+
+    .stage { display: none; width: 100%; max-width: 420px; position: relative; z-index: 1; }
+    .stage.active { display: block; animation: fadeUp 0.3s ease; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20%     { transform: translateX(-8px); }
+      40%     { transform: translateX(8px); }
+      60%     { transform: translateX(-6px); }
+      80%     { transform: translateX(6px); }
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface);
+      border-radius: var(--r);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+    .card-body { padding: 2rem 1.75rem 1.5rem; }
+
+    /* ── Logo row ── */
+    .logo-row {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .5rem;
+      margin-bottom: 1.5rem;
+    }
+    .logo-row img { height: 52px; width: auto; }
+    .logo-sub { font-size: .75rem; color: var(--muted); font-weight: 500; }
+
+    /* ── Icon badge ── */
+    .icon-badge {
+      width: 72px; height: 72px;
+      background: var(--purple-l);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1.25rem;
+      font-size: 2rem;
+    }
+
+    /* ── Welcome text ── */
+    .welcome-title { font-size: 1.5rem; font-weight: 900; color: var(--text); text-align: center; margin-bottom: .35rem; }
+    .welcome-sub   { font-size: .875rem; color: var(--muted); text-align: center; margin-bottom: 1.5rem; }
+
+    /* ── Choice buttons ── */
+    .choice-btn {
+      display: flex;
+      align-items: center;
+      gap: .875rem;
+      width: 100%;
+      padding: .875rem 1.125rem;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-sm);
+      cursor: pointer;
+      transition: all .18s;
+      margin-bottom: .75rem;
+      text-align: right;
+    }
+    .choice-btn:hover {
+      border-color: var(--purple);
+      background: var(--purple-t);
+      transform: translateX(-3px);
+    }
+    .choice-btn .cb-icon {
+      width: 42px; height: 42px; border-radius: 50%;
+      background: var(--purple-l);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.25rem; flex-shrink: 0;
+    }
+    .choice-btn .cb-text { flex: 1; }
+    .choice-btn .cb-title { font-size: .95rem; font-weight: 700; color: var(--text); display: block; }
+    .choice-btn .cb-desc  { font-size: .78rem; color: var(--muted); display: block; margin-top: 2px; }
+    .choice-btn .cb-arrow { color: var(--purple); font-size: 1.1rem; flex-shrink: 0; }
+
+    /* ── Back btn ── */
+    .back-btn {
+      display: flex; align-items: center; gap: .4rem;
+      background: none; border: none; cursor: pointer;
+      color: var(--purple); font-size: .85rem; font-weight: 600;
+      font-family: inherit; margin-bottom: 1rem;
+      padding: .25rem 0;
+      transition: opacity .15s;
+    }
+    .back-btn:hover { opacity: .7; }
+
+    /* ── Section title ── */
+    .section-title {
+      font-size: 1.3rem; font-weight: 900;
+      color: var(--text); margin-bottom: .3rem;
+    }
+    .section-sub { font-size: .85rem; color: var(--muted); margin-bottom: 1.25rem; }
+
+    /* ── Info cards grid ── */
+    .info-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: .625rem; margin-bottom: 1.25rem;
+    }
+    .info-card {
+      background: var(--purple-l);
+      border-radius: var(--r-sm);
+      padding: .75rem .875rem;
+      border: 1px solid var(--purple-m);
+    }
+    .info-card .ic-icon { font-size: 1.3rem; margin-bottom: .3rem; }
+    .info-card .ic-label { font-size: .7rem; color: var(--purple); font-weight: 700; letter-spacing: .3px; }
+    .info-card .ic-val   { font-size: .85rem; font-weight: 700; color: var(--text); margin-top: 2px; line-height: 1.3; }
+
+    /* ── Telegram CTA ── */
+    .tg-card {
+      background: linear-gradient(135deg, #2563EB, #1D4ED8);
+      border-radius: var(--r-sm);
+      padding: 1rem 1.25rem;
+      display: flex; align-items: center; gap: .875rem;
+      text-decoration: none; margin-bottom: 1.25rem;
+      transition: transform .18s, box-shadow .18s;
+      box-shadow: 0 4px 16px rgba(37,99,235,.3);
+    }
+    .tg-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(37,99,235,.4); }
+    .tg-icon { font-size: 2rem; flex-shrink: 0; }
+    .tg-text .tg-title { font-size: .95rem; font-weight: 800; color: #fff; }
+    .tg-text .tg-desc  { font-size: .78rem; color: rgba(255,255,255,.8); margin-top: 2px; }
+    .tg-arrow { color: rgba(255,255,255,.7); font-size: 1.1rem; margin-right: auto; }
+
+    /* ── AI Chat ── */
+    .ai-panel {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-sm);
+      overflow: hidden;
+    }
+    .ai-header {
+      background: var(--purple-t);
+      border-bottom: 1px solid var(--border);
+      padding: .625rem 1rem;
+      display: flex; align-items: center; gap: .5rem;
+    }
+    .ai-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--purple); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    .ai-header-text { font-size: .82rem; font-weight: 700; color: var(--purple); }
+
+    .ai-messages {
+      padding: .75rem;
+      min-height: 100px;
+      max-height: 200px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+    }
+    .msg-bot {
+      background: var(--purple-l);
+      border-radius: 0 var(--r-sm) var(--r-sm) var(--r-sm);
+      padding: .625rem .875rem;
+      font-size: .82rem;
+      color: var(--text);
+      line-height: 1.6;
+      max-width: 90%;
+      align-self: flex-end;
+    }
+    .msg-user {
+      background: var(--purple);
+      border-radius: var(--r-sm) 0 var(--r-sm) var(--r-sm);
+      padding: .625rem .875rem;
+      font-size: .82rem;
+      color: #fff;
+      line-height: 1.6;
+      max-width: 90%;
+      align-self: flex-start;
+    }
+    .ai-input-row {
+      display: flex;
+      gap: .5rem;
+      padding: .625rem;
+      border-top: 1px solid var(--border);
+    }
+    .ai-input {
+      flex: 1;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: .55rem .875rem;
+      font-size: .85rem;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--bg);
+      outline: none;
+      transition: border-color .15s;
+    }
+    .ai-input:focus { border-color: var(--purple); background: #fff; }
+    .ai-send {
+      background: var(--purple);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: .55rem 1rem;
+      cursor: pointer;
+      font-size: .85rem;
+      font-weight: 700;
+      font-family: inherit;
+      transition: background .15s;
+      white-space: nowrap;
+    }
+    .ai-send:hover { background: var(--purple-d); }
+    .ai-send:disabled { opacity: .5; cursor: not-allowed; }
+
+    .quick-qs {
+      display: flex; flex-wrap: wrap; gap: .4rem;
+      padding: .5rem .625rem 0;
+    }
+    .quick-q {
+      background: var(--purple-t);
+      border: 1px solid var(--purple-m);
+      border-radius: 20px;
+      padding: .3rem .75rem;
+      font-size: .75rem;
+      color: var(--purple);
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 600;
+      transition: all .15s;
+    }
+    .quick-q:hover { background: var(--purple-l); }
+
+    /* ── Admin form ── */
+    .form-group { margin-bottom: 1rem; }
+    label { display: block; font-size: .85rem; font-weight: 700; color: var(--text); margin-bottom: .4rem; }
+    .input-wrap { position: relative; }
+    .form-input {
+      width: 100%;
+      padding: .7rem 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: .95rem;
+      color: var(--text);
+      background: var(--bg);
+      outline: none;
+      font-family: inherit;
+      transition: border-color .15s, background .15s;
+    }
+    .form-input:focus { border-color: var(--purple); background: #fff; }
+    .eye-btn {
+      position: absolute; left: .75rem; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none; cursor: pointer;
+      color: var(--muted); font-size: 1rem; padding: .2rem; line-height: 1;
+    }
+    #adminPassword { padding-left: 2.5rem; }
+
+    .submit-btn {
+      width: 100%;
+      padding: .8rem;
+      background: var(--purple);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background .15s, transform .1s;
+      margin-top: .25rem;
+    }
+    .submit-btn:hover { background: var(--purple-d); }
+    .submit-btn:active { transform: scale(.98); }
+    .submit-btn:disabled { opacity: .6; cursor: not-allowed; }
+
+    .error-msg {
+      background: #FEF2F2;
+      color: var(--red);
+      border: 1px solid #FECACA;
+      border-radius: 8px;
+      padding: .6rem 1rem;
+      font-size: .85rem;
+      margin-top: .75rem;
+      display: none;
+    }
+
+    /* ── Card footer ── */
+    .card-footer {
+      background: linear-gradient(135deg, var(--purple), var(--purple-d));
+      padding: .875rem 1.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: .4rem;
+    }
+    .footer-item {
+      color: rgba(255,255,255,.85);
+      font-size: .75rem;
+      display: flex;
+      align-items: center;
+      gap: .3rem;
+    }
+    .footer-item strong { color: #fff; font-weight: 700; }
+
+    /* ── Tracks list ── */
+    .tracks-list {
+      display: flex; flex-direction: column; gap: .4rem;
+      margin-bottom: 1.25rem;
+    }
+    .track-item {
+      display: flex; align-items: center; gap: .6rem;
+      background: var(--purple-t);
+      border-radius: 8px;
+      padding: .55rem .875rem;
+      border: 1px solid var(--purple-m);
+    }
+    .track-item .ti-icon { font-size: 1rem; flex-shrink: 0; }
+    .track-item .ti-label { font-size: .85rem; font-weight: 600; color: var(--text); flex: 1; }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: var(--purple-m); border-radius: 2px; }
+
+    /* Wide layout for participant page */
+    @media (min-width: 720px) {
+      #stage-participant .stage-inner { max-width: 660px; }
+    }
+    .stage-inner { width: 100%; max-width: 420px; margin: 0 auto; }
+    #stage-participant .stage-inner { max-width: 620px; }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ STAGE 1: ROLE SELECTION ══════════════════════════════ -->
+  <div class="stage active" id="stage-select">
+    <div class="card">
+      <div class="card-body">
+        <div class="logo-row">
+          <img src="/logo.png" alt="سراج · Siraj">
+          <span class="logo-sub">نظام إدارة الهاكاثون</span>
+        </div>
+
+        <div class="icon-badge">🔐</div>
+        <h1 class="welcome-title">مرحباً بك</h1>
+        <p class="welcome-sub">اختر نوع الدخول</p>
+
+        <button class="choice-btn" onclick="showStage('participant')">
+          <div class="cb-icon">👥</div>
+          <div class="cb-text">
+            <span class="cb-title">دخول المشاركين</span>
+            <span class="cb-desc">الدخول للمشاركين في الهاكاثون</span>
+          </div>
+          <span class="cb-arrow">←</span>
+        </button>
+
+        <button class="choice-btn" onclick="showStage('admin')">
+          <div class="cb-icon">🔒</div>
+          <div class="cb-text">
+            <span class="cb-title">دخول المنظمين والمرشدين</span>
+            <span class="cb-desc">الدخول للمنظمين والمرشدين</span>
+          </div>
+          <span class="cb-arrow">←</span>
+        </button>
+      </div>
+
+      <div class="card-footer">
+        <div class="footer-item">🗓 <strong>7–9 مايو 2026</strong></div>
+        <div class="footer-item">🏫 <strong>جامعة الأمير سطام</strong></div>
+        <div class="footer-item">🤖 <strong>Agenticthon 2026</strong></div>
+      </div>
+    </div>
+
+    <!-- Siraj team attribution -->
+    <div style="text-align:center;margin-top:.875rem;padding:.5rem 1rem;">
+      <div style="font-size:.66rem;color:var(--muted);letter-spacing:.7px;font-weight:600;margin-bottom:.45rem;">✦ فريق سراج ✦</div>
+      <div style="display:flex;justify-content:center;align-items:center;">
+        <div style="text-align:center;padding:.25rem .875rem;">
+          <div style="font-size:.8rem;font-weight:800;color:var(--purple);">رزان كريم الشمري</div>
+          <div style="font-size:.62rem;color:var(--muted);margin-top:1px;">قائدة الفريق</div>
+        </div>
+        <div style="width:1px;height:26px;background:var(--border);flex-shrink:0;"></div>
+        <div style="text-align:center;padding:.25rem .875rem;">
+          <div style="font-size:.8rem;font-weight:700;color:var(--text2);">ريم كريم الشمري</div>
+        </div>
+        <div style="width:1px;height:26px;background:var(--border);flex-shrink:0;"></div>
+        <div style="text-align:center;padding:.25rem .875rem;">
+          <div style="font-size:.8rem;font-weight:700;color:var(--text2);">عبدالله العنزي</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ STAGE 2A: PARTICIPANT PAGE ═══════════════════════════ -->
+  <div class="stage" id="stage-participant">
+    <div class="stage-inner">
+      <button class="back-btn" onclick="showStage('select')">→ العودة</button>
+
+      <div class="card" style="margin-bottom:1rem;">
+        <div class="card-body">
+          <div class="logo-row" style="margin-bottom:1rem;">
+            <img src="/logo.png" alt="سراج · Siraj">
+          </div>
+
+          <h2 class="section-title" style="text-align:center;">مرحباً مشارك 👋</h2>
+          <p class="section-sub" style="text-align:center;">كل ما تحتاجه في هاكاثون Agenticthon</p>
+
+          <!-- Info grid -->
+          <div class="info-grid">
+            <div class="info-card">
+              <div class="ic-icon">📅</div>
+              <div class="ic-label">التاريخ</div>
+              <div class="ic-val">7–9 مايو 2026</div>
+            </div>
+            <div class="info-card">
+              <div class="ic-icon">📍</div>
+              <div class="ic-label">الموقع</div>
+              <div class="ic-val">الصالة الرياضية — جامعة الأمير سطام</div>
+            </div>
+            <div class="info-card">
+              <div class="ic-icon">🏆</div>
+              <div class="ic-label">الجوائز</div>
+              <div class="ic-val">جوائز قيّمة</div>
+            </div>
+            <div class="info-card">
+              <div class="ic-icon">🛤</div>
+              <div class="ic-label">المسارات</div>
+              <div class="ic-val">6 مسارات تنافسية</div>
+            </div>
+          </div>
+
+          <!-- Telegram CTA -->
+          <a class="tg-card" href="https://t.me/Seraj_event_bot" target="_blank" rel="noopener">
+            <span class="tg-icon">✈️</span>
+            <div class="tg-text">
+              <div class="tg-title">انضم للبوت الرسمي على تيليجرام</div>
+              <div class="tg-desc">@Seraj_event_bot · احصل على مساعدة فورية، جدول الفعاليات، وأكثر</div>
+            </div>
+            <span class="tg-arrow">←</span>
+          </a>
+
+          <!-- Tracks -->
+          <div style="font-size:.8rem;font-weight:700;color:var(--purple);letter-spacing:.5px;margin-bottom:.6rem;">المسارات التنافسية</div>
+          <div class="tracks-list">
+            <div class="track-item"><span class="ti-icon">⚙️</span><span class="ti-label">أتمتة العمليات (Process Automation)</span></div>
+            <div class="track-item"><span class="ti-icon">📣</span><span class="ti-label">التسويق الذكي (Smart Marketing)</span></div>
+            <div class="track-item"><span class="ti-icon">📞</span><span class="ti-label">مراكز الاتصال الذكية (Intelligent Call Centers)</span></div>
+            <div class="track-item"><span class="ti-icon">🎓</span><span class="ti-label">التعليم الذكي (Smart Education)</span></div>
+            <div class="track-item"><span class="ti-icon">🤝</span><span class="ti-label">أنظمة متعددة الوكلاء (Multi-Agent Systems)</span></div>
+            <div class="track-item"><span class="ti-icon">🔗</span><span class="ti-label">تواصل وكيل إلى وكيل (Agent-to-Agent / A2A)</span></div>
+          </div>
+
+          <!-- AI assistant -->
+          <div style="font-size:.8rem;font-weight:700;color:var(--purple);letter-spacing:.5px;margin-bottom:.6rem;">🤖 المساعد الذكي — اسأل أي سؤال</div>
+          <div class="ai-panel">
+            <div class="ai-header">
+              <div class="ai-dot"></div>
+              <span class="ai-header-text">وكيل سراج — متاح 24/7</span>
+            </div>
+            <div class="quick-qs">
+              <button class="quick-q" onclick="askPublic('ما هو جدول اليوم الأول؟')">📅 جدول اليوم</button>
+              <button class="quick-q" onclick="askPublic('كيف يمكنني تشكيل فريق؟')">👥 تشكيل فريق</button>
+              <button class="quick-q" onclick="askPublic('ما هي معايير التحكيم؟')">⚖️ التحكيم</button>
+              <button class="quick-q" onclick="askPublic('ما هي الجوائز وكيف توزع؟')">🏆 الجوائز</button>
+              <button class="quick-q" onclick="askPublic('أين WiFi الفعالية وما كلمة المرور؟')">📶 الواي فاي</button>
+              <button class="quick-q" onclick="askPublic('من هم المرشدون المتاحون؟')">🎓 المرشدون</button>
+            </div>
+            <div class="ai-messages" id="aiMessages">
+              <div class="msg-bot">أهلاً! أنا وكيل سراج الذكي 🤖 يمكنك سؤالي عن أي شيء يخص Agenticthon — الجدول، المسارات، الجوائز، الفرق، أو أي استفسار آخر.</div>
+            </div>
+            <div class="ai-input-row">
+              <input class="ai-input" id="publicQ" placeholder="اكتب سؤالك هنا..." onkeydown="if(event.key==='Enter')askPublic()">
+              <button class="ai-send" onclick="askPublic()" id="aiSendBtn">إرسال</button>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="card-footer">
+          <div class="footer-item">🤝 <strong>نادي الذكاء الاصطناعي × Beyond IT</strong></div>
+          <div class="footer-item">🔥 <strong>Agenticthon 2026</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ STAGE 2B: ADMIN LOGIN ═════════════════════════════════ -->
+  <div class="stage" id="stage-admin">
+    <div class="stage-inner">
+      <button class="back-btn" onclick="showStage('select')">→ العودة</button>
+
+      <div class="card">
+        <div class="card-body">
+          <div class="logo-row">
+            <img src="/logo.png" alt="سراج · Siraj">
+          </div>
+
+          <div class="icon-badge">🛡️</div>
+          <h2 class="section-title" style="text-align:center;">مرحباً مشرف</h2>
+          <p class="section-sub" style="text-align:center;">لوحة تحكم المنظمين والمرشدين</p>
+
+          <div style="background:var(--purple-l);border:1px solid var(--purple-m);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.25rem;text-align:center;">
+            <div style="font-size:2rem;margin-bottom:.5rem;">🔐</div>
+            <div style="font-size:.875rem;color:var(--text);font-weight:600;">وصول المنظمين فقط</div>
+            <div style="font-size:.8rem;color:var(--muted);margin-top:.3rem;">اضغط الزر للدخول المباشر للوحة التحكم</div>
+          </div>
+          <button class="submit-btn" id="loginBtn" onclick="doAdminLogin()">🚀 دخول مباشر للوحة التحكم</button>
+          <div class="error-msg" id="errorMsg"></div>
+        </div>
+
+        <div class="card-footer">
+          <div class="footer-item">🗓 <strong>7–9 مايو 2026</strong></div>
+          <div class="footer-item">🏫 <strong>جامعة الأمير سطام</strong></div>
+          <div class="footer-item">🤖 <strong>Agenticthon 2026</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+// ═══ Stage navigation ════════════════════════════════════════
+function showStage(name) {
+  document.querySelectorAll('.stage').forEach(s => s.classList.remove('active'));
+  document.getElementById('stage-' + name).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ═══ Redirect if already logged in ══════════════════════════
+(function() {
+  const t = localStorage.getItem('siraj_token');
+  const e = parseInt(localStorage.getItem('siraj_token_exp') || '0');
+  if (t && Date.now() < e) window.location.href = '/';
+})();
+
+// ═══ Admin login (direct, no password for demo) ══════════════
+async function doAdminLogin() {
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true;
+  btn.textContent = '...جاري الدخول';
+  document.getElementById('errorMsg').style.display = 'none';
+  try {
+    const res  = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: 'admin', password: 'Siraj@2026!' })
+    });
+    const data = await res.json();
+    if (!res.ok) { showError(data.error || 'خطأ في الدخول'); return; }
+    localStorage.setItem('siraj_token', data.token);
+    localStorage.setItem('siraj_token_exp', String(data.expiresAt));
+    window.location.href = '/';
+  } catch {
+    showError('تعذّر الاتصال بالخادم، حاول مجدداً');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🚀 دخول مباشر للوحة التحكم';
+  }
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg;
+  el.style.display = 'block';
+  const card = document.querySelector('#stage-admin .card');
+  card.style.animation = 'shake .4s ease';
+  setTimeout(() => card.style.animation = '', 400);
+}
+
+// ═══ Public AI Assistant ══════════════════════════════════════
+const messagesEl = document.getElementById('aiMessages');
+
+async function askPublic(preset) {
+  const input = document.getElementById('publicQ');
+  const q = preset || input.value.trim();
+  if (!q) return;
+  input.value = '';
+
+  appendMsg(q, 'user');
+  const btn = document.getElementById('aiSendBtn');
+  btn.disabled = true;
+  btn.textContent = '...';
+
+  const thinking = appendMsg('⏳ الوكيل يفكر...', 'bot');
+
+  try {
+    const res = await fetch('/api/public/ask', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: q })
+    });
+    const data = await res.json();
+    thinking.textContent = data.answer || 'لا يوجد رد في الوقت الحالي.';
+  } catch {
+    thinking.textContent = 'تعذّر الاتصال بالوكيل، حاول مجدداً.';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'إرسال';
+  }
+}
+
+function appendMsg(text, type) {
+  const el = document.createElement('div');
+  el.className = type === 'user' ? 'msg-user' : 'msg-bot';
+  el.textContent = text;
+  messagesEl.appendChild(el);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+  return el;
+}
+</script>
+</body>
+</html>
