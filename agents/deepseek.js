@@ -5,7 +5,7 @@ async function askDeepSeek(systemPrompt, userMessage, options = {}) {
     const response = await axios.post(
       'https://api.deepseek.com/v1/chat/completions',
       {
-        model: 'deepseek-chat',
+        model: process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user',   content: userMessage  }
