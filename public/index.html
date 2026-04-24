@@ -155,13 +155,29 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);height:100vh
 .tbl tr:last-child td{border-bottom:none;}
 .tbl tbody tr:hover td{background:var(--sf2);}
 
-/* ── TABS ────────────────────────────────────────── */
-.tabs{display:flex;gap:4px;}
-.tab{padding:4px 12px;border-radius:var(--rxs);cursor:pointer;font-size:12px;font-weight:700;font-family:var(--sans);border:1px solid transparent;transition:all .15s;background:transparent;color:var(--text3);}
-.tab:hover{background:var(--sf2);color:var(--text2);}
-.tab-teal  {background:var(--teal-l);color:var(--teal-d);border-color:rgba(13,148,136,.2);}
-.tab-amber {background:var(--amber-l);color:var(--amber);border-color:rgba(217,119,6,.2);}
-.tab-purple{background:var(--purple-l);color:var(--purple);border-color:rgba(124,58,237,.2);}
+/* ── TAB NAV ─────────────────────────────────────── */
+.tab-nav{
+  display:flex;padding:10px 14px 0;gap:3px;flex-shrink:0;
+  background:var(--sf2);border-bottom:2px solid var(--border);
+  overflow-x:auto;scrollbar-width:none;
+}
+.tab-nav::-webkit-scrollbar{display:none;}
+.tab-nav-btn{
+  display:flex;align-items:center;gap:7px;
+  padding:9px 20px 11px;border-radius:8px 8px 0 0;
+  font-size:13px;font-weight:700;font-family:var(--sans);
+  border:none;background:transparent;cursor:pointer;
+  color:var(--text3);border-bottom:3px solid transparent;
+  margin-bottom:-2px;transition:all .18s;white-space:nowrap;
+}
+.tab-nav-btn .tico{font-size:16px;transition:transform .15s;}
+.tab-nav-btn:hover{color:var(--text2);background:rgba(0,0,0,.04);}
+.tab-nav-btn:hover .tico{transform:scale(1.15);}
+.t-active-teal  {color:#fff!important;background:var(--teal)!important;border-bottom-color:var(--teal-d)!important;box-shadow:0 -1px 8px rgba(13,148,136,.2);}
+.t-active-amber {color:#fff!important;background:var(--amber)!important;border-bottom-color:#b45309!important;box-shadow:0 -1px 8px rgba(217,119,6,.2);}
+.t-active-purple{color:#fff!important;background:var(--purple)!important;border-bottom-color:#5b21b6!important;box-shadow:0 -1px 8px rgba(124,58,237,.2);}
+.t-active-blue  {color:#fff!important;background:var(--blue)!important;border-bottom-color:#1d4ed8!important;box-shadow:0 -1px 8px rgba(37,99,235,.2);}
+@media(max-width:768px){.tab-nav-btn{padding:7px 14px 9px;font-size:12px;gap:5px;}.tab-nav-btn .tico{font-size:14px;}}
 
 /* ── PILLS ───────────────────────────────────────── */
 .pill{display:inline-flex;align-items:center;gap:3px;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;font-family:var(--mono);border:1px solid;}
@@ -367,17 +383,27 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);height:100vh
     <!-- Main merged card: 4 tabs -->
     <div class="card main-card">
       <div class="ch">
-        <div class="tabs">
-          <button class="tab tab-teal" id="tab-att"   onclick="setTab('att')">المشاركون</button>
-          <button class="tab"          id="tab-teams" onclick="setTab('teams')">الفرق</button>
-          <button class="tab"          id="tab-ask"   onclick="setTab('ask')">الوكيل</button>
-          <button class="tab"          id="tab-cmd"   onclick="setTab('cmd')">أوامر</button>
-        </div>
+        <div class="ico ico-xs ico-teal">🗂️</div>
+        <span class="ch-title">إدارة الفعالية</span>
         <div id="tabActBtns" class="ml" style="display:flex;gap:6px;align-items:center;">
           <span class="pill p-teal" id="attCount">0/0</span>
           <button class="ab ab-teal"  onclick="doCheckinAll()"    id="btn-all">تسجيل الكل</button>
           <button class="ab ab-amber" onclick="doFormTeams(this)" id="btn-teams">تكوين فرق</button>
         </div>
+      </div>
+      <div class="tab-nav">
+        <button class="tab-nav-btn t-active-teal" id="tabn-att"   onclick="setTab('att')">
+          <span class="tico">👥</span><span id="tab-att">المشاركون</span>
+        </button>
+        <button class="tab-nav-btn" id="tabn-teams" onclick="setTab('teams')">
+          <span class="tico">🏆</span><span id="tab-teams">الفرق</span>
+        </button>
+        <button class="tab-nav-btn" id="tabn-ask" onclick="setTab('ask')">
+          <span class="tico">🤖</span><span id="tab-ask">الوكيل</span>
+        </button>
+        <button class="tab-nav-btn" id="tabn-cmd" onclick="setTab('cmd')">
+          <span class="tico">⚡</span><span id="tab-cmd">أوامر</span>
+        </button>
       </div>
 
       <!-- Pane: Attendees -->
@@ -630,20 +656,19 @@ function buildAgents(s){
 // ══ TABS ═════════════════════════════════════════════════════
 let curTab='att';
 const PANE_DISP={att:'block',teams:'flex',ask:'flex',cmd:'flex'};
-const TAB_STYLE={att:'tab-teal',teams:'tab-amber',ask:'tab-purple',cmd:'tab-teal'};
+const TAB_ACTIVE={att:'tab-nav-btn t-active-teal',teams:'tab-nav-btn t-active-amber',ask:'tab-nav-btn t-active-purple',cmd:'tab-nav-btn t-active-blue'};
 const ALL_TABS=['att','teams','ask','cmd'];
 
 function setTab(tab){
   curTab=tab;
   ALL_TABS.forEach(id=>{
     const p=document.getElementById(`pane-${id}`);if(p)p.style.display='none';
-    const b=document.getElementById(`tab-${id}`);if(b)b.className='tab';
+    const b=document.getElementById(`tabn-${id}`);if(b)b.className='tab-nav-btn';
     const m=document.getElementById(`mob-${id}`);if(m)m.className='mob-nav-btn';
   });
   const p=document.getElementById(`pane-${tab}`);if(p)p.style.display=PANE_DISP[tab]||'block';
-  const b=document.getElementById(`tab-${tab}`);if(b)b.className=`tab ${TAB_STYLE[tab]||'tab-teal'}`;
+  const b=document.getElementById(`tabn-${tab}`);if(b)b.className=TAB_ACTIVE[tab]||'tab-nav-btn t-active-teal';
   const m=document.getElementById(`mob-${tab}`);if(m)m.className='mob-nav-btn active';
-  // show action buttons only for attendees / teams tabs
   const act=document.getElementById('tabActBtns');
   if(act)act.style.display=(tab==='att'||tab==='teams')?'flex':'none';
 }
