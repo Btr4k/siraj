@@ -14,34 +14,25 @@
   --sf2:     #F8FAFC;
   --border:  #E2E8F0;
   --bdr2:    #CBD5E1;
-
   --text:    #0F172A;
   --text2:   #475569;
   --text3:   #94A3B8;
-
   --teal:    #0D9488;
   --teal-l:  #CCFBF1;
   --teal-d:  #0F766E;
-
   --amber:   #D97706;
   --amber-l: #FEF3C7;
-
   --red:     #DC2626;
   --red-l:   #FEE2E2;
-
   --green:   #16A34A;
   --green-l: #DCFCE7;
-
   --blue:    #2563EB;
   --blue-l:  #DBEAFE;
-
   --purple:  #7C3AED;
   --purple-l:#EDE9FE;
-
   --sh:   0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04);
   --sh-md:0 4px 14px rgba(0,0,0,.08);
   --sh-lg:0 8px 30px rgba(0,0,0,.1);
-
   --r:   12px;
   --rsm: 8px;
   --rxs: 6px;
@@ -51,7 +42,7 @@
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
-body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column;}
 
 /* ── 3D BADGES ──────────────────────────────────── */
 .ico{display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:12px;position:relative;overflow:hidden;font-size:1.2rem;transition:transform .15s;}
@@ -59,7 +50,6 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .ico::after{content:'';position:absolute;top:0;left:-70%;width:45%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.28),transparent);transform:skewX(-20deg);pointer-events:none;}
 .ico:hover::after{animation:shine .4s ease;}
 @keyframes shine{0%{left:-70%}100%{left:140%}}
-
 .ico-teal  {background:linear-gradient(145deg,#2DD4BF,#0D9488);box-shadow:3px 4px 12px rgba(13,148,136,.35),inset 0 1px 0 rgba(255,255,255,.35),inset 0 -1px 0 rgba(0,0,0,.12);}
 .ico-amber {background:linear-gradient(145deg,#FCD34D,#D97706);box-shadow:3px 4px 12px rgba(217,119,6,.35),inset 0 1px 0 rgba(255,255,255,.4),inset 0 -1px 0 rgba(0,0,0,.12);}
 .ico-red   {background:linear-gradient(145deg,#F87171,#B91C1C);box-shadow:3px 4px 12px rgba(220,38,38,.3),inset 0 1px 0 rgba(255,255,255,.3),inset 0 -1px 0 rgba(0,0,0,.12);}
@@ -68,32 +58,32 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .ico-blue  {background:linear-gradient(145deg,#60A5FA,#1D4ED8);box-shadow:3px 4px 12px rgba(37,99,235,.3),inset 0 1px 0 rgba(255,255,255,.3),inset 0 -1px 0 rgba(0,0,0,.12);}
 .ico-xs{width:30px;height:30px;border-radius:8px;font-size:.9rem;}
 .ico-sm{width:38px;height:38px;border-radius:10px;font-size:1.05rem;}
-.ico-md{width:50px;height:50px;border-radius:13px;font-size:1.4rem;}
+.ico-md{width:46px;height:46px;border-radius:13px;font-size:1.3rem;}
 
 /* ── HEADER ─────────────────────────────────────── */
 .hdr{
   background:var(--surface);border-bottom:1px solid var(--border);
   box-shadow:var(--sh);position:sticky;top:0;z-index:100;
-  padding:0 24px;height:64px;
+  padding:0 24px;height:60px;flex-shrink:0;
   display:flex;align-items:center;justify-content:space-between;
 }
 .hdr-left{display:flex;align-items:center;gap:12px;}
 .hdr-name{font-size:14px;font-weight:700;color:var(--text);}
 .hdr-sub{font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:1px;}
-.vsep{width:1px;height:28px;background:var(--border);}
+.vsep{width:1px;height:28px;background:var(--border);flex-shrink:0;}
 
 /* countdown */
 .cd{display:flex;flex-direction:column;align-items:center;}
 .cd-lbl{font-size:8px;color:var(--text3);font-family:var(--mono);letter-spacing:2px;margin-bottom:2px;}
 .cd-row{display:flex;align-items:center;gap:3px;direction:ltr;}
-.cd-n{font-family:var(--mono);font-size:26px;font-weight:700;line-height:1;min-width:36px;text-align:center;transition:color .3s;}
-.cd-s{font-family:var(--mono);font-size:18px;opacity:.35;padding-bottom:3px;}
+.cd-n{font-family:var(--mono);font-size:24px;font-weight:700;line-height:1;min-width:34px;text-align:center;transition:color .3s;}
+.cd-s{font-family:var(--mono);font-size:17px;opacity:.35;padding-bottom:3px;}
 .cd-u{font-size:7px;color:var(--text3);text-align:center;margin-top:1px;}
-.cd-bar{width:140px;height:2px;background:var(--border);border-radius:1px;margin-top:4px;overflow:hidden;}
+.cd-bar{width:130px;height:2px;background:var(--border);border-radius:1px;margin-top:4px;overflow:hidden;}
 .cd-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--amber));border-radius:1px;transition:width 1s;}
 
 /* status dots */
-.st-row{display:flex;align-items:center;gap:14px;}
+.st-row{display:flex;align-items:center;gap:12px;}
 .st-item{display:flex;align-items:center;gap:4px;flex-direction:column;}
 .st-dot{width:6px;height:6px;border-radius:50%;}
 .d-on {background:#22C55E;box-shadow:0 0 5px #22C55E;animation:blink 2s infinite;}
@@ -104,47 +94,46 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .st-val{font-size:9px;color:var(--text2);font-family:var(--mono);font-weight:700;}
 
 .hdr-right{display:flex;align-items:center;gap:8px;}
-.btn{padding:6px 14px;border-radius:var(--rxs);border:1px solid;cursor:pointer;font-size:12px;font-weight:700;font-family:var(--sans);transition:all .15s;}
+.btn{padding:5px 12px;border-radius:var(--rxs);border:1px solid;cursor:pointer;font-size:12px;font-weight:700;font-family:var(--sans);transition:all .15s;}
 .btn-lang  {background:var(--sf2);color:var(--text2);border-color:var(--bdr2);}
 .btn-lang:hover{background:var(--teal-l);color:var(--teal-d);border-color:var(--teal);}
 .btn-out   {background:var(--red-l);color:var(--red);border-color:rgba(220,38,38,.2);}
 .btn-out:hover{background:var(--red);color:#fff;}
-.live-badge{display:flex;align-items:center;gap:5px;background:var(--green-l);border:1px solid rgba(22,163,74,.2);padding:4px 10px;border-radius:var(--rxs);}
+.live-badge{display:flex;align-items:center;gap:5px;background:var(--green-l);border:1px solid rgba(22,163,74,.2);padding:3px 10px;border-radius:var(--rxs);}
 .live-badge span{font-size:10px;color:var(--green);font-family:var(--mono);font-weight:700;}
 
 /* ── INFO BAR ────────────────────────────────────── */
-.infobar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;flex-wrap:wrap;min-height:38px;}
-.ic{display:flex;align-items:center;gap:4px;padding:7px 14px;font-size:11px;color:var(--text2);border-left:1px solid var(--border);}
+.infobar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;flex-wrap:wrap;flex-shrink:0;min-height:34px;}
+.ic{display:flex;align-items:center;gap:4px;padding:5px 14px;font-size:11px;color:var(--text2);border-left:1px solid var(--border);}
 .ic:first-child{padding-right:0;border-left:none;}
 .ic strong{color:var(--text);font-weight:700;}
 
 /* ── TIMELINE ────────────────────────────────────── */
-.tl-wrap{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 24px 18px;}
-.tl-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.tl-wrap{background:var(--surface);border-bottom:1px solid var(--border);padding:5px 24px 6px;flex-shrink:0;}
+.tl-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
 .tl-ht{font-size:12px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:6px;}
-.tl-cur{font-size:11px;color:var(--amber);font-weight:700;background:var(--amber-l);padding:3px 10px;border-radius:20px;}
-.tl-track{position:relative;height:4px;background:var(--border);border-radius:2px;margin-bottom:24px;}
+.tl-cur{font-size:11px;color:var(--amber);font-weight:700;background:var(--amber-l);padding:2px 10px;border-radius:20px;}
+.tl-track{position:relative;height:4px;background:var(--border);border-radius:2px;margin-bottom:22px;}
 .tl-fill{position:absolute;top:0;left:0;height:100%;background:linear-gradient(90deg,var(--teal),var(--amber));border-radius:2px;box-shadow:0 0 6px rgba(13,148,136,.3);}
 .tl-dot{position:absolute;top:50%;transform:translate(-50%,-50%);z-index:2;}
 .tl-pip{border-radius:50%;border:2px solid;}
-.tl-lbl{position:absolute;top:12px;left:50%;transform:translateX(-50%);white-space:nowrap;text-align:center;}
+.tl-lbl{position:absolute;top:11px;left:50%;transform:translateX(-50%);white-space:nowrap;text-align:center;}
 .tl-time{font-family:var(--mono);font-size:9px;}
 .tl-name{font-size:9px;margin-top:1px;}
 
 /* ── CARDS ───────────────────────────────────────── */
 .card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--sh);overflow:hidden;}
-.ch{display:flex;align-items:center;gap:8px;padding:11px 16px;border-bottom:1px solid var(--border);background:var(--sf2);}
+.ch{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid var(--border);background:var(--sf2);flex-shrink:0;}
 .ch-title{font-size:13px;font-weight:700;color:var(--text);}
 .ch-sub{font-size:10px;color:var(--text3);font-family:var(--mono);}
 .ml{margin-right:auto;}
 
 /* ── STAT CARDS ──────────────────────────────────── */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
-@media(max-width:700px){.stats{grid-template-columns:1fr 1fr;}}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;flex-shrink:0;}
 .sc{
   background:var(--surface);border-radius:var(--r);border:1px solid var(--border);
-  box-shadow:var(--sh);padding:18px 16px;
-  display:flex;align-items:center;gap:14px;
+  box-shadow:var(--sh);padding:13px 14px;
+  display:flex;align-items:center;gap:12px;
   position:relative;overflow:hidden;cursor:default;
   transition:box-shadow .2s,transform .15s;
 }
@@ -155,23 +144,24 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .sc-amber::before {background:linear-gradient(90deg,var(--amber),#FCD34D);}
 .sc-red::before   {background:linear-gradient(90deg,var(--red),#F87171);}
 .sc-info{flex:1;min-width:0;}
-.sc-lbl{font-size:11px;color:var(--text3);font-weight:700;margin-bottom:5px;letter-spacing:.3px;}
-.sc-val{font-family:var(--mono);font-size:34px;font-weight:700;line-height:1;color:var(--text);}
-.sc-sub{font-size:10px;color:var(--text3);margin-top:4px;}
+.sc-lbl{font-size:11px;color:var(--text3);font-weight:700;margin-bottom:3px;letter-spacing:.3px;}
+.sc-val{font-family:var(--mono);font-size:28px;font-weight:700;line-height:1;color:var(--text);}
+.sc-sub{font-size:10px;color:var(--text3);margin-top:3px;}
 
 /* ── TABLE ───────────────────────────────────────── */
 .tbl{width:100%;border-collapse:collapse;font-size:13px;}
-.tbl th{color:var(--text3);text-align:right;padding:8px 14px;border-bottom:1px solid var(--border);font-weight:700;font-size:10px;letter-spacing:1px;background:var(--sf2);font-family:var(--mono);position:sticky;top:0;}
-.tbl td{padding:9px 14px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.tbl th{color:var(--text3);text-align:right;padding:7px 12px;border-bottom:1px solid var(--border);font-weight:700;font-size:10px;letter-spacing:1px;background:var(--sf2);font-family:var(--mono);position:sticky;top:0;z-index:1;}
+.tbl td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
 .tbl tr:last-child td{border-bottom:none;}
 .tbl tbody tr:hover td{background:var(--sf2);}
 
 /* ── TABS ────────────────────────────────────────── */
 .tabs{display:flex;gap:4px;}
-.tab{padding:5px 13px;border-radius:var(--rxs);cursor:pointer;font-size:12px;font-weight:700;font-family:var(--sans);border:1px solid transparent;transition:all .15s;background:transparent;color:var(--text3);}
+.tab{padding:4px 12px;border-radius:var(--rxs);cursor:pointer;font-size:12px;font-weight:700;font-family:var(--sans);border:1px solid transparent;transition:all .15s;background:transparent;color:var(--text3);}
 .tab:hover{background:var(--sf2);color:var(--text2);}
-.tab-teal {background:var(--teal-l);color:var(--teal-d);border-color:rgba(13,148,136,.2);}
-.tab-amber{background:var(--amber-l);color:var(--amber);border-color:rgba(217,119,6,.2);}
+.tab-teal  {background:var(--teal-l);color:var(--teal-d);border-color:rgba(13,148,136,.2);}
+.tab-amber {background:var(--amber-l);color:var(--amber);border-color:rgba(217,119,6,.2);}
+.tab-purple{background:var(--purple-l);color:var(--purple);border-color:rgba(124,58,237,.2);}
 
 /* ── PILLS ───────────────────────────────────────── */
 .pill{display:inline-flex;align-items:center;gap:3px;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;font-family:var(--mono);border:1px solid;}
@@ -182,7 +172,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .p-red   {background:var(--red-l);color:var(--red);border-color:rgba(220,38,38,.2);}
 
 /* ── ACTION BUTTONS ──────────────────────────────── */
-.ab{padding:6px 14px;border-radius:var(--rxs);cursor:pointer;font-size:12px;font-weight:700;font-family:var(--sans);border:1px solid;transition:all .15s;}
+.ab{padding:5px 12px;border-radius:var(--rxs);cursor:pointer;font-size:12px;font-weight:700;font-family:var(--sans);border:1px solid;transition:all .15s;}
 .ab-primary{background:var(--teal);color:#fff;border-color:var(--teal-d);box-shadow:0 2px 5px rgba(13,148,136,.25);}
 .ab-primary:hover{background:var(--teal-d);}
 .ab-teal{background:var(--teal-l);color:var(--teal-d);border-color:rgba(13,148,136,.2);}
@@ -194,7 +184,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .ab:disabled{opacity:.45;cursor:not-allowed;}
 
 /* ── FEED ────────────────────────────────────────── */
-.fi{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);transition:background .15s;}
+.fi{display:flex;align-items:flex-start;gap:10px;padding:9px 14px;border-bottom:1px solid var(--border);transition:background .15s;}
 .fi:hover{background:var(--sf2);}
 .fi:last-child{border-bottom:none;}
 .fb{flex-shrink:0;height:22px;min-width:48px;border-radius:var(--rxs);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:var(--sans);border:1px solid;}
@@ -204,59 +194,106 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .fi-when{font-size:10px;color:var(--text3);font-family:var(--mono);flex-shrink:0;}
 
 /* ── AGENT ROW ───────────────────────────────────── */
-.ar{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+.ar{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
 .ar:last-child{border-bottom:none;}
 .ar-name{font-size:12px;color:var(--text2);flex:1;}
 .ar-val{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--text);}
 .ar-unit{font-size:10px;color:var(--text3);}
 
 /* ── TEAM CARD ───────────────────────────────────── */
-.tc{padding:12px 14px;border-radius:var(--rsm);border-right:3px solid;background:var(--sf2);}
+.tc{padding:10px 12px;border-radius:var(--rsm);border-right:3px solid;background:var(--sf2);}
 .tc-name{font-size:13px;font-weight:700;margin-bottom:4px;}
 .tc-mem{font-size:11px;color:var(--text2);line-height:1.6;}
 .tc-why{font-size:10px;color:var(--text3);margin-top:4px;}
 
 /* ── ASK / CMD ───────────────────────────────────── */
-.qbtn{padding:6px 12px;border-radius:20px;cursor:pointer;font-size:11px;color:var(--text2);font-family:var(--sans);background:var(--sf2);border:1px solid var(--border);transition:all .15s;}
+.qbtn{padding:5px 12px;border-radius:20px;cursor:pointer;font-size:11px;color:var(--text2);font-family:var(--sans);background:var(--sf2);border:1px solid var(--border);transition:all .15s;}
 .qbtn:hover{background:var(--teal-l);color:var(--teal-d);border-color:rgba(13,148,136,.25);}
-
-.ainput{flex:1;background:var(--sf2);border:1.5px solid var(--border);border-radius:var(--rsm);padding:9px 13px;color:var(--text);font-size:13px;outline:none;font-family:var(--sans);direction:rtl;transition:border-color .15s,box-shadow .15s;}
+.ainput{flex:1;background:var(--sf2);border:1.5px solid var(--border);border-radius:var(--rsm);padding:8px 12px;color:var(--text);font-size:13px;outline:none;font-family:var(--sans);direction:rtl;transition:border-color .15s,box-shadow .15s;}
 .ainput:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,148,136,.12);}
 .ainput::placeholder{color:var(--text3);}
-
-.ai-ans{margin-top:10px;background:var(--teal-l);border-right:3px solid var(--teal);border-radius:var(--rsm);padding:12px 14px;font-size:13px;color:var(--teal-d);line-height:1.8;display:none;white-space:pre-wrap;}
-
-.cqbtn{padding:5px 11px;border:1px solid rgba(13,148,136,.2);background:var(--teal-l);border-radius:20px;cursor:pointer;font-size:11px;color:var(--teal-d);font-family:var(--sans);font-weight:700;transition:all .15s;}
+.ai-ans{background:var(--teal-l);border-right:3px solid var(--teal);border-radius:var(--rsm);padding:11px 13px;font-size:13px;color:var(--teal-d);line-height:1.8;display:none;white-space:pre-wrap;}
+.cqbtn{padding:4px 10px;border:1px solid rgba(13,148,136,.2);background:var(--teal-l);border-radius:20px;cursor:pointer;font-size:11px;color:var(--teal-d);font-family:var(--sans);font-weight:700;transition:all .15s;}
 .cqbtn:hover{background:var(--teal);color:#fff;border-color:var(--teal);}
-.cbar{display:flex;align-items:center;gap:8px;background:var(--sf2);border:1.5px solid var(--border);border-radius:var(--rsm);padding:8px 12px;transition:border-color .15s,box-shadow .15s;}
+.cbar{display:flex;align-items:center;gap:8px;background:var(--sf2);border:1.5px solid var(--border);border-radius:var(--rsm);padding:7px 12px;transition:border-color .15s,box-shadow .15s;}
 .cbar:focus-within{border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,148,136,.12);}
 .cprompt{color:var(--teal-d);font-family:var(--mono);font-size:14px;font-weight:700;}
 .cinput{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--sans);font-size:13px;direction:rtl;text-align:right;}
 .cinput::placeholder{color:var(--text3);}
-.cres{padding:10px 14px;border-radius:var(--rsm);font-size:12px;border-right:3px solid;display:none;margin-bottom:8px;font-weight:600;}
+.cres{padding:9px 13px;border-radius:var(--rsm);font-size:12px;border-right:3px solid;display:none;font-weight:600;}
 .cok {background:var(--green-l);border-color:var(--green);color:var(--green);}
 .cerr{background:var(--red-l);border-color:var(--red);color:var(--red);}
 .chist{display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--border);font-size:11px;}
 .chist:last-child{border-bottom:none;}
 
 /* ── ALERT ───────────────────────────────────────── */
-.al{display:flex;align-items:center;gap:8px;background:var(--red-l);border:1px solid rgba(220,38,38,.2);border-radius:var(--rsm);padding:10px 12px;}
+.al{display:flex;align-items:center;gap:8px;background:var(--red-l);border:1px solid rgba(220,38,38,.2);border-radius:var(--rsm);padding:9px 12px;}
 .al-msg{font-size:12px;color:var(--red);flex:1;font-weight:600;}
 
 /* ── BROADCAST ───────────────────────────────────── */
 .bc{position:fixed;top:0;left:0;right:0;z-index:200;display:none;background:var(--red-l);border-bottom:2px solid var(--red);padding:10px 24px;text-align:center;color:var(--red);font-size:13px;font-weight:700;box-shadow:0 4px 12px rgba(220,38,38,.15);}
 
+/* ── MAIN CARD (merged panes) ────────────────────── */
+.main-card{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;}
+.main-pane{flex:1;min-height:0;overflow-y:auto;}
+
 /* ── LAYOUT ──────────────────────────────────────── */
-.page{display:grid;grid-template-columns:1fr 300px;gap:14px;padding:14px 24px 24px;}
-@media(max-width:900px){.page{grid-template-columns:1fr;}.rpanel{display:none;}}
-.lcol{display:flex;flex-direction:column;gap:14px;}
-.rpanel{display:flex;flex-direction:column;gap:14px;}
+.page{display:grid;grid-template-columns:1fr 290px;gap:12px;padding:10px 20px 10px;flex:1;min-height:0;overflow:hidden;}
+.lcol{display:flex;flex-direction:column;gap:10px;height:100%;min-height:0;overflow:hidden;}
+.rpanel{display:flex;flex-direction:column;gap:10px;height:100%;min-height:0;overflow:hidden;}
+
+/* ── MOBILE BOTTOM NAV ───────────────────────────── */
+.mob-nav{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;z-index:110;
+  background:var(--surface);border-top:1px solid var(--border);
+  height:58px;
+  box-shadow:0 -4px 14px rgba(0,0,0,.07);
+  align-items:stretch;
+}
+.mob-nav-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  background:transparent;border:none;cursor:pointer;
+  font-family:var(--sans);color:var(--text3);font-size:9px;font-weight:700;
+  border-top:2px solid transparent;transition:all .15s;
+  -webkit-tap-highlight-color:transparent;padding:0;
+}
+.mob-nav-btn .mico{font-size:19px;line-height:1;}
+.mob-nav-btn.active{color:var(--teal);border-top-color:var(--teal);}
 
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-track{background:var(--sf2);}
 ::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:2px;}
 
 @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── RESPONSIVE ──────────────────────────────────── */
+@media(max-width:860px){
+  .page{grid-template-columns:1fr;}
+  .rpanel{display:none;}
+}
+@media(max-width:768px){
+  .hdr{height:52px;padding:0 14px;}
+  .cd,.st-row,.vsep{display:none;}
+  .infobar{display:none;}
+  .tl-wrap{display:none;}
+  .page{padding:8px 10px 66px;gap:8px;}
+  .stats{grid-template-columns:1fr 1fr;gap:8px;}
+  .sc{padding:10px 12px;}
+  .sc-val{font-size:22px;}
+  .sc-lbl{font-size:10px;}
+  .ico-md{width:38px;height:38px;font-size:1.1rem;}
+  .mob-nav{display:flex;}
+  .tab{font-size:11px;padding:4px 9px;}
+  .ch{padding:8px 12px;flex-wrap:wrap;gap:6px;}
+  .tbl th,.tbl td{padding:7px 10px;}
+  .tbl .hide-mob{display:none;}
+}
+@media(max-width:400px){
+  .stats{grid-template-columns:1fr 1fr;}
+  .sc-val{font-size:20px;}
+  .page{padding:6px 8px 64px;}
+}
 </style>
 </head>
 <body>
@@ -265,9 +302,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 
 <!-- ═══ HEADER ═══════════════════════════════════════════════ -->
 <div class="hdr">
-
   <div class="hdr-left">
-    <img src="/logo.png" alt="Siraj" style="height:40px;width:auto;">
+    <img src="/logo.png" alt="Siraj" style="height:38px;width:auto;">
     <div class="vsep"></div>
     <div>
       <div class="hdr-name" id="hdrTitle">Agenticthon — هاكاثون الوكلاء الذكية</div>
@@ -298,7 +334,6 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
     <button class="btn btn-out"  onclick="doLogout()">خروج</button>
     <div class="live-badge"><div class="st-dot d-on"></div><span id="liveLbl">مباشر</span></div>
   </div>
-
 </div>
 
 <!-- ═══ INFO BAR ══════════════════════════════════════════════ -->
@@ -323,117 +358,116 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 <!-- ═══ MAIN ══════════════════════════════════════════════════ -->
 <div class="page">
 
-  <!-- LEFT -->
+  <!-- ── LEFT COLUMN ── -->
   <div class="lcol">
 
     <!-- Stats -->
     <div class="stats" id="statsGrid"></div>
 
-    <!-- Attendees / Teams -->
-    <div class="card">
+    <!-- Main merged card: 4 tabs -->
+    <div class="card main-card">
       <div class="ch">
-        <div class="ico ico-xs ico-teal">👥</div>
         <div class="tabs">
           <button class="tab tab-teal" id="tab-att"   onclick="setTab('att')">المشاركون</button>
           <button class="tab"          id="tab-teams" onclick="setTab('teams')">الفرق</button>
+          <button class="tab"          id="tab-ask"   onclick="setTab('ask')">الوكيل</button>
+          <button class="tab"          id="tab-cmd"   onclick="setTab('cmd')">أوامر</button>
         </div>
-        <div class="ml" style="display:flex;gap:7px;align-items:center;">
+        <div id="tabActBtns" class="ml" style="display:flex;gap:6px;align-items:center;">
           <span class="pill p-teal" id="attCount">0/0</span>
           <button class="ab ab-teal"  onclick="doCheckinAll()"    id="btn-all">تسجيل الكل</button>
           <button class="ab ab-amber" onclick="doFormTeams(this)" id="btn-teams">تكوين فرق</button>
         </div>
       </div>
-      <div id="pane-att" style="overflow-y:auto;max-height:260px;">
+
+      <!-- Pane: Attendees -->
+      <div id="pane-att" class="main-pane">
         <table class="tbl">
           <thead><tr>
             <th id="th-name">الاسم</th>
-            <th id="th-skill">التخصص</th>
+            <th id="th-skill" class="hide-mob">التخصص</th>
             <th id="th-team">الفريق</th>
             <th id="th-status">الحضور</th>
-            <th style="width:44px;"></th>
+            <th style="width:40px;"></th>
           </tr></thead>
           <tbody id="attBody"></tbody>
         </table>
       </div>
-      <div id="pane-teams" style="display:none;overflow-y:auto;max-height:260px;padding:10px 14px;flex-direction:column;gap:7px;"></div>
-    </div>
 
-    <!-- Ask Agent -->
-    <div class="card">
-      <div class="ch">
-        <div class="ico ico-xs ico-purple">🤖</div>
-        <span class="ch-title" id="ask-lbl">اسأل الوكيل</span>
-        <span class="ch-sub ml">AI Q&A</span>
-      </div>
-      <div style="padding:12px 16px 14px;">
-        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;" id="quickBtns"></div>
+      <!-- Pane: Teams -->
+      <div id="pane-teams" class="main-pane" style="display:none;flex-direction:column;gap:7px;padding:10px 14px;"></div>
+
+      <!-- Pane: Ask Agent -->
+      <div id="pane-ask" class="main-pane" style="display:none;flex-direction:column;gap:10px;padding:14px 16px;">
+        <div style="display:flex;flex-wrap:wrap;gap:6px;" id="quickBtns"></div>
         <div style="display:flex;gap:8px;">
           <input class="ainput" id="questionInput" placeholder="اكتب سؤالك بالعربي أو الإنجليزي..." onkeydown="if(event.key==='Enter')sendQ()">
-          <button class="ab ab-primary" onclick="sendQ()" style="padding:9px 18px;">إرسال</button>
+          <button class="ab ab-primary" onclick="sendQ()" style="padding:8px 16px;">إرسال</button>
         </div>
         <div class="ai-ans" id="simAnswer"></div>
       </div>
-    </div>
 
-    <!-- Command Center -->
-    <div class="card">
-      <div class="ch">
-        <div class="ico ico-xs ico-amber">⚡</div>
-        <span class="ch-title" id="cmd-lbl">مركز الأوامر</span>
-        <span class="ch-sub ml">COMMAND CENTER</span>
-      </div>
-      <div style="padding:12px 16px 14px;">
-        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;" id="cmdQuickBtns"></div>
+      <!-- Pane: Command Center -->
+      <div id="pane-cmd" class="main-pane" style="display:none;flex-direction:column;gap:8px;padding:14px 16px;">
+        <div style="display:flex;flex-wrap:wrap;gap:6px;" id="cmdQuickBtns"></div>
         <div class="cres" id="cmdResult"></div>
         <div class="cbar">
           <span class="cprompt">›</span>
           <input class="cinput" id="cmdInput" placeholder="مثال: أضف مشارك اسمه أحمد تخصصه AI Engineer" onkeydown="if(event.key==='Enter')sendCmd()">
-          <button class="ab ab-primary" onclick="sendCmd()" id="cmdExec" style="padding:5px 14px;">تنفيذ</button>
+          <button class="ab ab-primary" onclick="sendCmd()" id="cmdExec" style="padding:5px 13px;">تنفيذ</button>
         </div>
-        <div style="margin-top:9px;max-height:90px;overflow-y:auto;" id="cmdHist"></div>
+        <div style="max-height:120px;overflow-y:auto;" id="cmdHist"></div>
       </div>
     </div>
 
   </div>
 
-  <!-- RIGHT -->
+  <!-- ── RIGHT PANEL ── -->
   <div class="rpanel">
 
     <!-- Agents -->
-    <div class="card">
+    <div class="card" style="flex-shrink:0;">
       <div class="ch">
         <div class="ico ico-xs ico-blue">🤖</div>
         <span class="ch-title" id="lbl-agents">حالة الوكلاء</span>
       </div>
-      <div style="padding:0 16px;" id="agentList"></div>
+      <div style="padding:0 14px;" id="agentList"></div>
     </div>
 
     <!-- Live Feed -->
-    <div class="card" style="flex:1;display:flex;flex-direction:column;max-height:340px;">
+    <div class="card" style="flex:1;min-height:0;display:flex;flex-direction:column;">
       <div class="ch">
         <div class="ico ico-xs ico-red">📡</div>
         <span class="ch-title" id="feed-lbl">النشاط الحي</span>
         <span class="ch-sub ml" style="color:var(--red);font-weight:700;animation:blink 1.5s infinite;">● LIVE</span>
       </div>
-      <div style="flex:1;overflow-y:auto;" id="feed"></div>
+      <div style="flex:1;min-height:0;overflow-y:auto;" id="feed"></div>
     </div>
 
     <!-- Alerts -->
-    <div class="card">
+    <div class="card" style="flex-shrink:0;">
       <div class="ch">
         <div class="ico ico-xs ico-amber">⚠️</div>
         <span class="ch-title">التنبيهات</span>
       </div>
-      <div style="padding:12px 14px;display:flex;flex-direction:column;gap:8px;">
-        <button onclick="doDetectIssues()" class="ab ab-red" id="btn-detect" style="width:100%;padding:9px;">
+      <div style="padding:10px 12px;display:flex;flex-direction:column;gap:7px;">
+        <button onclick="doDetectIssues()" class="ab ab-red" id="btn-detect" style="width:100%;padding:8px;">
           🔍 فحص المشكلات
         </button>
-        <div id="alertsPanel" style="display:flex;flex-direction:column;gap:6px;max-height:160px;overflow-y:auto;"></div>
+        <div id="alertsPanel" style="display:flex;flex-direction:column;gap:5px;max-height:140px;overflow-y:auto;"></div>
       </div>
     </div>
 
   </div>
 </div>
+
+<!-- ═══ MOBILE BOTTOM NAV ══════════════════════════════════════ -->
+<nav class="mob-nav" id="mobNav">
+  <button class="mob-nav-btn active" id="mob-att"   onclick="setTab('att')">  <span class="mico">👥</span>المشاركون</button>
+  <button class="mob-nav-btn"        id="mob-teams" onclick="setTab('teams')"><span class="mico">🏆</span>الفرق</button>
+  <button class="mob-nav-btn"        id="mob-ask"   onclick="setTab('ask')">  <span class="mico">🤖</span>الوكيل</button>
+  <button class="mob-nav-btn"        id="mob-cmd"   onclick="setTab('cmd')">  <span class="mico">⚡</span>أوامر</button>
+</nav>
 
 <script>
 // ══ AUTH ═════════════════════════════════════════════════════
@@ -463,9 +497,9 @@ function tickCD(){
   const diff=Math.max(0,EVENT_END-Date.now());
   const h=Math.floor(diff/3600000),m=Math.floor((diff%3600000)/60000),s=Math.floor((diff%60000)/1000);
   const col=diff<3600000?'var(--red)':diff<7200000?'var(--amber)':'var(--teal)';
-  ['cdH','cdM','cdS'].forEach((id,i)=>{const el=document.getElementById(id);el.textContent=pad([h,m,s][i]);el.style.color=col;});
+  ['cdH','cdM','cdS'].forEach((id,i)=>{const el=document.getElementById(id);if(el){el.textContent=pad([h,m,s][i]);el.style.color=col;}});
   const pct=Math.min(100,Math.max(0,(Date.now()-EVENT_START)/(EVENT_END-EVENT_START)*100));
-  document.getElementById('cdFill').style.width=pct+'%';
+  const f=document.getElementById('cdFill');if(f)f.style.width=pct+'%';
 }
 setInterval(tickCD,1000);tickCD();
 
@@ -483,7 +517,9 @@ const TL=[
 function buildTL(){
   const ai=TL.findIndex(e=>e.act);
   const pct=ai/(TL.length-1)*100;
-  document.getElementById('tlWrap').innerHTML=`
+  const wrap=document.getElementById('tlWrap');
+  if(!wrap)return;
+  wrap.innerHTML=`
     <div class="tl-track">
       <div class="tl-fill" style="width:${pct}%"></div>
       ${TL.map((ev,i)=>{
@@ -498,8 +534,9 @@ function buildTL(){
           </div>
         </div>`;
       }).join('')}
-    </div><div style="height:42px;"></div>`;
-  document.getElementById('tl-active').textContent='الحالية: '+(TL.find(e=>e.act)?.lbl||'—');
+    </div><div style="height:32px;"></div>`;
+  const ta=document.getElementById('tl-active');
+  if(ta)ta.textContent='الحالية: '+(TL.find(e=>e.act)?.lbl||'—');
 }
 buildTL();
 
@@ -511,9 +548,9 @@ const TR={
     'ib-date':'7–9 مايو 2026','ib-venue':'الصالة الرياضية — جامعة الأمير سطام، الخرج',
     'ib-tracks':'6 مسارات تنافسية',
     'tl-label':'الجدول الزمني','lbl-agents':'حالة الوكلاء',
-    'ask-lbl':'اسأل الوكيل','cmd-lbl':'مركز الأوامر','feed-lbl':'النشاط الحي',
+    'feed-lbl':'النشاط الحي',
     'th-name':'الاسم','th-skill':'التخصص','th-team':'الفريق','th-status':'الحضور',
-    'tab-att':'المشاركون','tab-teams':'الفرق',
+    'tab-att':'المشاركون','tab-teams':'الفرق','tab-ask':'الوكيل','tab-cmd':'أوامر',
     'btn-all':'تسجيل الكل','btn-teams':'تكوين فرق','btn-detect':'🔍 فحص المشكلات',
     thinking:'⏳ الوكيل يفكر...', noReply:'لا يوجد رد',
     forming:'⏳ جاري...', noTeams:'لا فرق — اضغط «تكوين فرق»',
@@ -524,9 +561,9 @@ const TR={
     'ib-date':'May 7–9, 2026','ib-venue':'Sports Hall — Prince Sattam University, Al-Kharj',
     'ib-tracks':'6 Competition Tracks',
     'tl-label':'Timeline','lbl-agents':'Agent Status',
-    'ask-lbl':'Ask the Agent','cmd-lbl':'Command Center','feed-lbl':'Live Activity',
+    'feed-lbl':'Live Activity',
     'th-name':'Name','th-skill':'Skill','th-team':'Team','th-status':'Status',
-    'tab-att':'Attendees','tab-teams':'Teams',
+    'tab-att':'Attendees','tab-teams':'Teams','tab-ask':'AI Agent','tab-cmd':'Commands',
     'btn-all':'Check-in All','btn-teams':'Form Teams','btn-detect':'🔍 Detect Issues',
     thinking:'⏳ Thinking...', noReply:'No response',
     forming:'⏳ Working...', noTeams:'No teams — click "Form Teams"',
@@ -539,7 +576,11 @@ function toggleLang(){
   document.getElementById('langBtn').textContent=lang==='ar'?'EN':'عر';
   document.documentElement.lang=lang;
   document.documentElement.dir=lang==='ar'?'rtl':'ltr';
-  Object.keys(TR.ar).forEach(id=>{const el=document.getElementById(id);if(el&&el.tagName!=='INPUT')el.textContent=t(id);});
+  Object.keys(TR.ar).forEach(id=>{const el=document.getElementById(id);if(el&&el.tagName!=='INPUT'&&el.tagName!=='BUTTON')el.textContent=t(id);});
+  // update buttons separately (avoid overwriting onclick)
+  ['btn-all','btn-teams','btn-detect','tab-att','tab-teams','tab-ask','tab-cmd'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.textContent=t(id);
+  });
   renderQBtns();renderCQBtns();
 }
 
@@ -566,14 +607,14 @@ buildStats();
 // ══ AGENTS ═══════════════════════════════════════════════════
 function buildAgents(s){
   const ag=[
-    {lbl:'وكيل التسجيل',    badge:'ico-teal',  icon:'🗂️', desc:'Track Signups · Collect Data',    val:s.registered||0,         unit:'مشارك'},
-    {lbl:'وكيل الحضور',     badge:'ico-green', icon:'✅',  desc:'Check-In · No-Show Alerts',      val:s.checkedIn||0,          unit:'حضور'},
-    {lbl:'وكيل التوجيه',    badge:'ico-amber', icon:'📍',  desc:'Guidance · Venue · Schedule',    val:s.questionsAnswered||0,  unit:'سؤال'},
-    {lbl:'وكيل التطابق',    badge:'ico-purple',icon:'🤝',  desc:'Mentor Match · Team Match',      val:s.teamsFormed||0,        unit:'فريق'},
-    {lbl:'مركز الأوامر',    badge:'ico-blue',  icon:'⚡',  desc:'Data Management · Commands',     val:'جاهز',                  unit:''},
+    {lbl:'وكيل التسجيل',    badge:'ico-teal',  icon:'🗂️', desc:'Track Signups · Collect Data',  val:s.registered||0,        unit:'مشارك'},
+    {lbl:'وكيل الحضور',     badge:'ico-green', icon:'✅',  desc:'Check-In · No-Show Alerts',    val:s.checkedIn||0,         unit:'حضور'},
+    {lbl:'وكيل التوجيه',    badge:'ico-amber', icon:'📍',  desc:'Guidance · Venue · Schedule',  val:s.questionsAnswered||0, unit:'سؤال'},
+    {lbl:'وكيل التطابق',    badge:'ico-purple',icon:'🤝',  desc:'Mentor Match · Team Match',    val:s.teamsFormed||0,       unit:'فريق'},
+    {lbl:'مركز الأوامر',    badge:'ico-blue',  icon:'⚡',  desc:'Data Management · Commands',   val:'جاهز',                 unit:''},
   ];
   document.getElementById('agentList').innerHTML=ag.map(a=>`
-    <div class="ar" style="align-items:flex-start;padding:10px 0;">
+    <div class="ar" style="align-items:flex-start;padding:8px 0;">
       <div class="ico ico-xs ${a.badge}" style="margin-top:2px;">${a.icon}</div>
       <div style="flex:1;min-width:0;">
         <div style="font-size:12px;font-weight:700;color:var(--text);">${a.lbl}</div>
@@ -588,12 +629,23 @@ function buildAgents(s){
 
 // ══ TABS ═════════════════════════════════════════════════════
 let curTab='att';
+const PANE_DISP={att:'block',teams:'flex',ask:'flex',cmd:'flex'};
+const TAB_STYLE={att:'tab-teal',teams:'tab-amber',ask:'tab-purple',cmd:'tab-teal'};
+const ALL_TABS=['att','teams','ask','cmd'];
+
 function setTab(tab){
   curTab=tab;
-  const att=document.getElementById('pane-att'),teams=document.getElementById('pane-teams');
-  const tA=document.getElementById('tab-att'),tT=document.getElementById('tab-teams');
-  if(tab==='att'){att.style.display='block';teams.style.display='none';tA.className='tab tab-teal';tT.className='tab';}
-  else{att.style.display='none';teams.style.display='flex';tT.className='tab tab-amber';tA.className='tab';}
+  ALL_TABS.forEach(id=>{
+    const p=document.getElementById(`pane-${id}`);if(p)p.style.display='none';
+    const b=document.getElementById(`tab-${id}`);if(b)b.className='tab';
+    const m=document.getElementById(`mob-${id}`);if(m)m.className='mob-nav-btn';
+  });
+  const p=document.getElementById(`pane-${tab}`);if(p)p.style.display=PANE_DISP[tab]||'block';
+  const b=document.getElementById(`tab-${tab}`);if(b)b.className=`tab ${TAB_STYLE[tab]||'tab-teal'}`;
+  const m=document.getElementById(`mob-${tab}`);if(m)m.className='mob-nav-btn active';
+  // show action buttons only for attendees / teams tabs
+  const act=document.getElementById('tabActBtns');
+  if(act)act.style.display=(tab==='att'||tab==='teams')?'flex':'none';
 }
 
 // ══ COLORS ═══════════════════════════════════════════════════
@@ -627,7 +679,7 @@ function renderUI(d){
   document.getElementById('sv-c').textContent=s.checkedIn;
   document.getElementById('sv-t').textContent=s.teamsFormed;
   document.getElementById('sv-a').textContent=s.alertsActive;
-  document.getElementById('attCount').textContent=`${s.checkedIn}/${s.registered}`;
+  const ac=document.getElementById('attCount');if(ac)ac.textContent=`${s.checkedIn}/${s.registered}`;
   buildAgents(s);
 
   // alerts
@@ -638,21 +690,21 @@ function renderUI(d){
     ap.innerHTML=d.alerts.map(a=>`
       <div class="al">
         <span class="al-msg">⚠️ ${a.message}</span>
-        <button onclick="resolveAlert(${a.id})" class="ab ab-red" style="padding:3px 10px;font-size:11px;">حل</button>
+        <button onclick="resolveAlert(${a.id})" class="ab ab-red" style="padding:3px 9px;font-size:11px;">حل</button>
       </div>`).join('');
   }else{
     bc.style.display='none';
-    ap.innerHTML='<div style="text-align:center;padding:12px;color:var(--text3);font-size:12px;">لا تنبيهات نشطة ✓</div>';
+    ap.innerHTML='<div style="text-align:center;padding:10px;color:var(--text3);font-size:12px;">لا تنبيهات نشطة ✓</div>';
   }
 
   // attendees
   document.getElementById('attBody').innerHTML=d.attendees.slice(0,20).map(a=>`
     <tr>
       <td style="font-weight:700;">${a.name}</td>
-      <td style="color:var(--text2);font-family:var(--mono);font-size:11px;">${a.skill}</td>
+      <td class="hide-mob" style="color:var(--text2);font-family:var(--mono);font-size:11px;">${a.skill}</td>
       <td>${a.team?`<span class="pill p-amber">#${a.team}</span>`:'<span style="color:var(--text3);">—</span>'}</td>
       <td>${a.checkedIn?`<span class="pill p-green">✓ حاضر</span>`:`<span class="pill p-muted">غائب</span>`}</td>
-      <td>${!a.checkedIn?`<button onclick="quickCheckin('${a.name.replace(/'/g,"\\'")}',this)" class="ab ab-teal" style="padding:2px 9px;font-size:11px;">✓</button>`:''}</td>
+      <td>${!a.checkedIn?`<button onclick="quickCheckin('${a.name.replace(/'/g,"\\'")}',this)" class="ab ab-teal" style="padding:2px 8px;font-size:11px;">✓</button>`:''}</td>
     </tr>`).join('');
 
   // teams
@@ -667,8 +719,8 @@ function renderUI(d){
         ${tm.reason?`<div class="tc-why">${tm.reason}</div>`:''}
       </div>`;
     }).join('')
-    :`<div style="text-align:center;padding:32px;color:var(--text3);">
-        <div style="font-size:32px;margin-bottom:8px;">👥</div>
+    :`<div style="text-align:center;padding:28px;color:var(--text3);">
+        <div style="font-size:28px;margin-bottom:8px;">👥</div>
         <div style="font-size:13px;">${t('noTeams')}</div>
       </div>`;
 
@@ -747,7 +799,7 @@ function renderCQBtns(){
 function fillCmd(tpl){const i=document.getElementById('cmdInput');i.value=tpl;i.focus();}
 
 // ══ ASK ══════════════════════════════════════════════════════
-function simulate(q){document.getElementById('questionInput').value=q;sendQ();}
+function simulate(q){document.getElementById('questionInput').value=q;setTab('ask');sendQ();}
 async function sendQ(){
   const inp=document.getElementById('questionInput');
   const q=inp.value.trim();if(!q)return;
