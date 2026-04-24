@@ -11,7 +11,7 @@ const state = {
   alerts: [],
   telegramUsers: [], // { telegramId, name? } — collected from webhook
   stats: {
-    registered: 20,
+    registered: attendees.length,
     checkedIn: 0,
     teamsFormed: 0,
     questionsAnswered: 0,

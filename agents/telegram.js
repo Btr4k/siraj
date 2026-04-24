@@ -156,7 +156,7 @@ function buildWifi() {
     text: (
       `📶 *الواي فاي*\n━━━━━━━━━━━━━━━━\n\n` +
       `🌐 الشبكة:\n\`Siraj-Event\`\n\n` +
-      `🔑 كلمة المرور:\n\`hackathon2025\`\n\n` +
+      `🔑 كلمة المرور:\n\`${process.env.WIFI_PASSWORD || 'hackathon2025'}\`\n\n` +
       `_اضغط على النص لنسخه_`
     ),
     menu: BACK_BTN

@@ -20,6 +20,7 @@ async function formTeams() {
       t.members.forEach(id => {
         const att = state.attendees.find(a => a.id === id);
         if (att) att.team = t.team;
+        else console.warn(`[Matchmaker] formTeams: unknown attendee ID ${id} from AI`);
       });
       state.teams.push(t);
     });
@@ -36,9 +37,13 @@ async function matchMentor(teamId, need) {
   if (!available.length) return { success: false, message: 'جميع المنتورين مشغولون' };
 
   const list = available.map(m => `${m.id}. ${m.name} - ${m.specialty}`).join('\n');
-  const result = await askDeepSeek('أنت منسق منتورين.', `فريق #${teamId} يحتاج: ${need}\nالمتاحون:\n${list}\nمن الأنسب؟ جملتان فقط.`);
+  const result = await askDeepSeek(
+    'أنت منسق منتورين. أجب برقم ID المنتور المناسب فقط، بدون أي نص إضافي.',
+    `فريق #${teamId} يحتاج: ${need}\nالمتاحون:\n${list}\nأجب برقم ID فقط.`
+  );
 
-  const mentor = available[0];
+  const mentorId = parseInt(result?.trim());
+  const mentor = available.find(m => m.id === mentorId) || available[0];
   mentor.available = false;
   mentor.team = teamId;
   logActivity('Matchmaker', 'طابق منتور', `الفريق #${teamId} ← ${mentor.name}`);

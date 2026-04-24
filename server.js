@@ -5,6 +5,7 @@ const cors       = require('cors');
 const axios      = require('axios');
 const path       = require('path');
 const crypto     = require('crypto');
+const rateLimit  = require('express-rate-limit');
 
 const { route }                                          = require('./agents/orchestrator');
 const { formTeams }                                      = require('./agents/matchmaker');
@@ -37,10 +38,19 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
 
+const publicAskLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'طلبات كثيرة، حاول بعد دقيقة / Too many requests, try again in a minute.' }
+});
+
 // Public: participant AI Q&A (no auth)
-app.post('/api/public/ask', async (req, res) => {
+app.post('/api/public/ask', publicAskLimiter, async (req, res) => {
   const { question } = req.body || {};
   if (!question) return res.status(400).json({ error: 'missing question' });
+  if (question.length > 500) return res.status(400).json({ error: 'السؤال طويل جداً / Question too long (max 500 chars).' });
   res.json({ answer: await route(question) });
 });
 
@@ -70,6 +80,11 @@ async function sendTelegram(chatId, text, replyMarkup = null) {
 }
 
 app.post('/webhook', async (req, res) => {
+  const secret = process.env.TELEGRAM_WEBHOOK_SECRET;
+  if (secret) {
+    const incoming = req.headers['x-telegram-bot-api-secret-token'];
+    if (incoming !== secret) return res.sendStatus(403);
+  }
   res.sendStatus(200);
 
   // ── Button press ──────────────────────────────────────────────
@@ -93,7 +108,7 @@ app.post('/webhook', async (req, res) => {
   if (!msg?.text) return;
 
   const chatId = msg.chat.id;
-  const text   = msg.text.trim();
+  const text   = msg.text.trim().substring(0, 500);
 
   if (text.startsWith('/start') || text.startsWith('/help')) {
     await sendTelegram(chatId, getWelcomeText(), MAIN_MENU);

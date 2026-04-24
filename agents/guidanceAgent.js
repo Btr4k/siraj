@@ -32,7 +32,7 @@ Day 3 (9 May): 09:00 Final Dev | 15:00 Presentations | 19:00 Awards Ceremony
 === VENUE & PARKING ===
 P1 — North Entrance: 150 spots
 P2 — South Entrance: 80 spots (backup)
-Wi-Fi: Network: Siraj-Event | Password: hackathon2025
+Wi-Fi: Network: Siraj-Event | Password: ${process.env.WIFI_PASSWORD || 'hackathon2025'}
 
 === JUDGING ===
 1. Team registration → 2. Initial screening → 3. 3-day sprint → 4. Final presentation`;
