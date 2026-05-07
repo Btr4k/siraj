@@ -150,12 +150,20 @@ function registerTelegramUser(telegramId, name) {
   }
 }
 
+function linkTelegramChat(attendeeId, chatId) {
+  const att = state.attendees.find(a => a.id === attendeeId);
+  if (att && !att.telegramChatId) {
+    att.telegramChatId = String(chatId);
+    logActivity('System', 'ربط حساب تيليجرام', att.name);
+  }
+}
+
 module.exports = {
   state,
   logActivity, addAlert, resolveAlert,
   addAttendee, updateAttendee, checkinAttendee, checkoutAttendee, deleteAttendee,
   addMentor, updateMentor,
   addScheduleItem,
-  registerTelegramUser,
+  registerTelegramUser, linkTelegramChat,
   findAttendee, findMentor
 };

@@ -10,7 +10,8 @@ const rateLimit  = require('express-rate-limit');
 const { route }                                          = require('./agents/orchestrator');
 const { formTeams }                                      = require('./agents/matchmaker');
 const { checkInAll, checkParkingLoad, detectIssues }     = require('./agents/registrar');
-const { state, logActivity, resolveAlert, checkinAttendee, addAlert } = require('./data/state');
+const { state, logActivity, resolveAlert, checkinAttendee, addAlert, linkTelegramChat } = require('./data/state');
+const { pushToChat } = require('./agents/notifier');
 const { MAIN_MENU, BACK_BTN, getWelcomeText, handleCallback, setCommands } = require('./agents/telegram');
 const { processCommand }                                 = require('./agents/dataManager');
 
@@ -20,6 +21,59 @@ const SESSION_TTL = 8 * 60 * 60 * 1000;
 // ── Public chat sessions: sessionId → { messages, userProfile, expiresAt } ──
 const chatSessions = new Map();
 const CHAT_TTL     = 2 * 60 * 60 * 1000; // 2 hours
+
+// ── Reminder scheduling ──────────────────────────────────────────
+const REMINDER_SESSIONS = {
+  'تسجيل':       { time: '09:00', label: 'التسجيل' },
+  'افتتاح':      { time: '10:00', label: 'حفل الافتتاح' },
+  'غداء':        { time: '13:30', label: 'استراحة الغداء' },
+  'lunch':       { time: '13:30', label: 'Lunch Break' },
+  'إرشاد':       { time: '15:00', label: 'جلسة الإرشاد' },
+  'ارشاد':       { time: '15:00', label: 'جلسة الإرشاد' },
+  'mentor':      { time: '15:00', label: 'Mentoring Session' },
+  'عرض':         { time: '15:00', label: 'العروض النهائية' },
+  'presentation':{ time: '15:00', label: 'Final Presentations' },
+  'جوائز':       { time: '19:00', label: 'حفل الجوائز' },
+  'ceremony':    { time: '19:00', label: 'Awards Ceremony' },
+  'awards':      { time: '19:00', label: 'Awards Ceremony' },
+};
+
+function parseReminderTime(text) {
+  // Direct clock time: "ذكرني الساعة 14:30"
+  const direct = text.match(/(\d{1,2}):(\d{2})/);
+  if (direct) {
+    const h = parseInt(direct[1]), m = parseInt(direct[2]);
+    return { h, m, label: `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`, minBefore: 0 };
+  }
+  // Session keyword + optional minutes before
+  for (const [key, session] of Object.entries(REMINDER_SESSIONS)) {
+    if (text.includes(key)) {
+      const minBefore = parseInt(text.match(/(\d+)\s*(?:دقيق|min)/i)?.[1] || '30');
+      const [sh, sm] = session.time.split(':').map(Number);
+      const total = sh * 60 + sm - minBefore;
+      return { h: Math.floor(total / 60), m: total % 60, label: session.label, minBefore };
+    }
+  }
+  return null;
+}
+
+function scheduleReminder(chatId, parsed) {
+  const now  = new Date();
+  const fire = new Date();
+  fire.setHours(parsed.h, parsed.m, 0, 0);
+  const delayMs = fire - now;
+  if (delayMs < 60_000) return false; // already passed or < 1 min away
+
+  setTimeout(async () => {
+    const isAr = /[؀-ۿ]/.test(parsed.label);
+    const msg = isAr
+      ? `🔔 *تذكير!*\n*${parsed.label}* ${parsed.minBefore ? `بعد ${parsed.minBefore} دقيقة` : 'الآن'} — توجّه الآن! 🏃`
+      : `🔔 *Reminder!*\n*${parsed.label}* ${parsed.minBefore ? `in ${parsed.minBefore} min` : 'now'} — head over! 🏃`;
+    await pushToChat(chatId, msg);
+  }, delayMs);
+
+  return true;
+}
 
 function getOrCreateChatSession(sessionId) {
   if (sessionId) {
@@ -186,10 +240,26 @@ app.post('/webhook', async (req, res) => {
   const text   = msg.text.trim().substring(0, 500);
 
   if (text.startsWith('/start') || text.startsWith('/help')) {
-    // Reset session on /start so returning users get a fresh context
     chatSessions.delete(String(chatId));
     await sendTelegram(chatId, getWelcomeText(), MAIN_MENU);
     return;
+  }
+
+  // ── Reminder intent ─────────────────────────────────────────
+  if (/ذكرني|تذكيرني|تذكير|remind\s*me/i.test(text)) {
+    const parsed = parseReminderTime(text);
+    if (parsed) {
+      const ok    = scheduleReminder(String(chatId), parsed);
+      const isAr  = /[؀-ۿ]/.test(text);
+      const msg   = ok
+        ? (isAr
+            ? `✅ *تم!* سأذكرك ${parsed.minBefore ? `قبل *${parsed.minBefore}* دقيقة من *${parsed.label}*` : `عند الساعة *${parsed.label}*`} 🔔`
+            : `✅ *Done!* I'll remind you ${parsed.minBefore ? `${parsed.minBefore} min before *${parsed.label}*` : `at *${parsed.label}*`} 🔔`)
+        : (isAr ? '⚠️ الوقت المحدد قد مضى أو اقترب جداً.' : '⚠️ That time has already passed or is too close.');
+      await sendTelegram(chatId, msg, BACK_BTN);
+      return;
+    }
+    // No parseable time → fall through to route() for a natural reply
   }
 
   const { sid, sess } = getOrCreateChatSession(String(chatId));
@@ -200,6 +270,11 @@ app.post('/webhook', async (req, res) => {
 
   if (reply) sess.messages.push({ role: 'assistant', content: reply });
   if (sess.messages.length > 16) sess.messages = sess.messages.slice(-16);
+
+  // ── Link chatId to attendee once identity is known ──────────
+  if (sess.userProfile?.attendeeId) {
+    linkTelegramChat(sess.userProfile.attendeeId, String(chatId));
+  }
 
   await sendTelegram(chatId, reply, BACK_BTN);
 });
@@ -222,7 +297,22 @@ app.post('/api/checkin',        authMiddleware, (req, res) => {
   if (!identifier) return res.status(400).json({ error: 'missing identifier' });
   res.json(checkinAttendee(identifier));
 });
-app.post('/api/form-teams',     authMiddleware, async (req, res) => res.json(await formTeams()));
+app.post('/api/form-teams', authMiddleware, async (req, res) => {
+  const result = await formTeams();
+  if (result.success && result.teams?.length) {
+    for (const team of result.teams) {
+      const members = team.members
+        .map(id => state.attendees.find(a => a.id === id))
+        .filter(Boolean);
+      const memberList = members.map(a => `• *${a.name}* — ${a.skill}`).join('\n');
+      const msg = `🎉 *تم تشكيل فريقك في Agenticthon\\!*\n\n*فريق \\#${team.team}*\n${memberList}${team.reason ? `\n\n💡 ${team.reason}` : ''}\n\n_حظاً موفقاً\\! 🚀_`;
+      for (const member of members) {
+        if (member.telegramChatId) pushToChat(member.telegramChatId, msg).catch(() => {});
+      }
+    }
+  }
+  res.json(result);
+});
 app.post('/api/detect-issues',  authMiddleware, (req, res) => res.json({ issues: detectIssues() }));
 app.post('/api/parking',        authMiddleware, (req, res) => res.json(checkParkingLoad()));
 app.post('/api/resolve-alert/:id', authMiddleware, (req, res) => { resolveAlert(parseInt(req.params.id)); res.json({ ok: true }); });
