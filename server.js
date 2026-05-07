@@ -106,8 +106,20 @@ const app  = express();
 const PORT = process.env.PORT || 3000;
 const TG   = `https://api.telegram.org/bot${process.env.TELEGRAM_TOKEN}`;
 
-app.use(cors());
-app.use(bodyParser.json());
+// CORS: allow only same-origin for admin endpoints; public endpoints are open
+app.use('/api/public', cors());
+app.use(cors({ origin: false }));
+
+// Security headers
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
+
+app.use(bodyParser.json({ limit: '50kb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
@@ -153,24 +165,30 @@ const publicActionLimiter = rateLimit({
   message: { error: 'طلبات كثيرة، حاول بعد دقيقة.' }
 });
 
+// Strip HTML tags from user-supplied strings to prevent stored XSS
+function sanitize(str, maxLen = 100) {
+  if (!str || typeof str !== 'string') return '';
+  return str.replace(/<[^>]*>/g, '').replace(/[<>'"]/g, '').trim().slice(0, maxLen);
+}
+
 // Public: participant self-service actions (no auth)
 app.post('/api/public/action', publicActionLimiter, async (req, res) => {
   const { action, data, sessionId } = req.body || {};
-  if (!action) return res.status(400).json({ error: 'missing action' });
+  if (!action || typeof action !== 'string') return res.status(400).json({ error: 'missing action' });
 
   const sess     = sessionId ? chatSessions.get(sessionId) : null;
-  const userName = sess?.userProfile?.name || data?.name || 'مشارك';
+  const userName = sanitize(sess?.userProfile?.name || data?.name || 'مشارك', 50);
 
   switch (action) {
     case 'request_mentor': {
-      const { projectArea } = data || {};
+      const projectArea = sanitize(data?.projectArea, 80);
       const msg = `🆘 طلب مرشد: ${userName} — المجال: ${projectArea || 'غير محدد'}`;
       addAlert(msg, 'warning');
       logActivity('PublicAction', 'طلب مرشد', userName);
       return res.json({ success: true, message: 'تم تسجيل طلبك! سيتواصل معك المنظمون قريباً.' });
     }
     case 'team_interest': {
-      const { skill } = data || {};
+      const skill = sanitize(data?.skill, 50);
       logActivity('PublicAction', 'اهتمام بتشكيل فريق', `${userName} (${skill || '؟'})`);
       return res.json({ success: true, message: 'تم تسجيل اهتمامك! سنتواصل معك للتنسيق.' });
     }

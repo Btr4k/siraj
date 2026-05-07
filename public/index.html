@@ -737,8 +737,8 @@ function renderUI(d){
     bc.style.display='block';
     ap.innerHTML=d.alerts.map(a=>`
       <div class="al">
-        <span class="al-msg">⚠️ ${a.message}</span>
-        <button onclick="resolveAlert(${a.id})" class="ab ab-red" style="padding:3px 9px;font-size:11px;">حل</button>
+        <span class="al-msg">⚠️ ${esc(a.message)}</span>
+        <button onclick="resolveAlert(${Number(a.id)})" class="ab ab-red" style="padding:3px 9px;font-size:11px;">حل</button>
       </div>`).join('');
   }else{
     bc.style.display='none';
@@ -748,11 +748,11 @@ function renderUI(d){
   // attendees
   document.getElementById('attBody').innerHTML=d.attendees.slice(0,20).map(a=>`
     <tr>
-      <td style="font-weight:700;">${a.name}</td>
-      <td class="hide-mob" style="color:var(--text2);font-family:var(--mono);font-size:11px;">${a.skill}</td>
-      <td>${a.team?`<span class="pill p-amber">#${a.team}</span>`:'<span style="color:var(--text3);">—</span>'}</td>
+      <td style="font-weight:700;">${esc(a.name)}</td>
+      <td class="hide-mob" style="color:var(--text2);font-family:var(--mono);font-size:11px;">${esc(a.skill)}</td>
+      <td>${a.team?`<span class="pill p-amber">#${Number(a.team)}</span>`:'<span style="color:var(--text3);">—</span>'}</td>
       <td>${a.checkedIn?`<span class="pill p-green">✓ حاضر</span>`:`<span class="pill p-muted">غائب</span>`}</td>
-      <td>${!a.checkedIn?`<button onclick="quickCheckin('${a.name.replace(/'/g,"\\'")}',this)" class="ab ab-teal" style="padding:2px 8px;font-size:11px;">✓</button>`:''}</td>
+      <td>${!a.checkedIn?`<button onclick="quickCheckin('${esc(a.name)}',this)" class="ab ab-teal" style="padding:2px 8px;font-size:11px;">✓</button>`:''}</td>
     </tr>`).join('');
 
   // teams
@@ -760,11 +760,11 @@ function renderUI(d){
   tp.innerHTML=d.teams.length>0
     ?d.teams.map((tm,i)=>{
       const col=TC[i%TC.length];
-      const names=tm.members.map(id=>{const a=d.attendees.find(x=>x.id===id);return a?a.name:`#${id}`;}).join('، ');
+      const names=tm.members.map(id=>{const a=d.attendees.find(x=>x.id===id);return a?esc(a.name):`#${Number(id)}`;}).join('، ');
       return `<div class="tc" style="border-color:${col};">
-        <div class="tc-name" style="color:${col};">فريق #${tm.team}</div>
+        <div class="tc-name" style="color:${col};">فريق #${Number(tm.team)}</div>
         <div class="tc-mem">${names}</div>
-        ${tm.reason?`<div class="tc-why">${tm.reason}</div>`:''}
+        ${tm.reason?`<div class="tc-why">${esc(tm.reason)}</div>`:''}
       </div>`;
     }).join('')
     :`<div style="text-align:center;padding:28px;color:var(--text3);">
@@ -778,12 +778,12 @@ function renderUI(d){
       const lbl=ALBL[item.agent]||item.agent;
       const st=ABADGE[item.agent]||ABADGE.System;
       return `<div class="fi" style="animation:fadeUp .3s ease ${i*.02}s both;">
-        <div class="fb" style="${st}">${lbl}</div>
+        <div class="fb" style="${st}">${esc(lbl)}</div>
         <div class="fi-inf">
-          <div class="fi-who">${item.action}</div>
-          <div class="fi-what">${item.detail}</div>
+          <div class="fi-who">${esc(item.action)}</div>
+          <div class="fi-what">${esc(item.detail)}</div>
         </div>
-        <div class="fi-when">${item.time}</div>
+        <div class="fi-when">${esc(item.time)}</div>
       </div>`;
     }).join('');
   }
