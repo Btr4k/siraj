@@ -12,7 +12,8 @@ const ROUTES = [
   {
     agent: 'attendance',
     keywords: [
-      'حضور','حاضر','غياب','غائب','check-in','checkin','no-show','وصل','لم يصل',
+      // Removed: 'حاضر' (substring of محاضر/محاضرة/محاضرات), 'وصل' (substring of توصل)
+      'حضور','حاضرون','حاضرين','غياب','غائب','check-in','checkin','no-show','لم يصل',
       'كم حضر','من حضر','attendance','arrived','present','absent','checked in'
     ]
   },
@@ -27,15 +28,17 @@ const ROUTES = [
   {
     agent: 'matchmaking',
     keywords: [
-      'فريق','فرق','مرشد','مرشدين','تطابق','تكوين','match','team','mentor',
-      'من في الفريق','يضم','أعضاء الفريق','table assign','جدول الفرق'
+      // Removed: 'فرق' (substring of "ما الفرق"), 'يضم' (substring of يضمن)
+      'فريق','مرشد','مرشدين','تطابق','تكوين','match','team','mentor',
+      'من في الفريق','أعضاء الفريق','table assign','جدول الفرق'
     ]
   },
   {
     agent: 'recommendation',
     keywords: [
+      // Removed: 'المحاضر' standalone (substring of المحاضرات) — multi-word versions below cover it
       'المحاضرات المناسبة','رتب لي جدول','جدول الحضور','توصية محاضرات','محاضرات مناسبة',
-      'ما يناسبني','المحاضر','معلومات عن المحاضر','من هو المحاضر',
+      'ما يناسبني','معلومات عن المحاضر','من هو المحاضر',
       'اقترح لي','رشح لي','ما المحاضرات',
       'أنا مهندس','أنا مصمم','أنا مطور','تخصصي','مستواي'
     ]
@@ -45,7 +48,9 @@ const ROUTES = [
     keywords: [
       'جدول','موقع','قاعة','مسار','مسارات','مواقف','واي فاي','wifi','wi-fi',
       'schedule','venue','track','parking','location','hall','how to get','directions',
-      'الجدول الزمني','متى','أين','وين','يوم','يبدأ','ينتهي','ساعة'
+      'الجدول الزمني','متى','أين','وين','يوم','يبدأ','ينتهي','ساعة',
+      // Added: explicit lecture/time keywords so schedule questions never hit wrong agent
+      'محاضر','محاضرة','محاضرات','وقت'
     ]
   }
 ];
@@ -72,13 +77,24 @@ const CHAIN_ROUTES = [
 function classifyIntent(message) {
   const lower = message.toLowerCase();
 
+  // Chains checked first (they are all multi-word, unambiguous)
   for (const chain of CHAIN_ROUTES) {
     if (chain.keywords.some(kw => lower.includes(kw))) return `chain:${chain.name}`;
   }
+
+  // Longest-match wins: a 13-char keyword beats a 6-char one in a different route
+  // This lets "من هو المحاضر" (recommendation) beat "من هو" (registration)
+  let bestAgent = null;
+  let bestLen   = 0;
   for (const route of ROUTES) {
-    if (route.keywords.some(kw => lower.includes(kw))) return route.agent;
+    for (const kw of route.keywords) {
+      if (lower.includes(kw) && kw.length > bestLen) {
+        bestLen   = kw.length;
+        bestAgent = route.agent;
+      }
+    }
   }
-  return 'general';
+  return bestAgent || 'general';
 }
 
 // ── User identity detection ────────────────────────────────────
