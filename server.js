@@ -186,11 +186,21 @@ app.post('/webhook', async (req, res) => {
   const text   = msg.text.trim().substring(0, 500);
 
   if (text.startsWith('/start') || text.startsWith('/help')) {
+    // Reset session on /start so returning users get a fresh context
+    chatSessions.delete(String(chatId));
     await sendTelegram(chatId, getWelcomeText(), MAIN_MENU);
     return;
   }
 
-  const reply = await route(text);
+  const { sid, sess } = getOrCreateChatSession(String(chatId));
+  const history = [...sess.messages];
+  sess.messages.push({ role: 'user', content: text });
+
+  const reply = await route(text, history, sess.userProfile);
+
+  if (reply) sess.messages.push({ role: 'assistant', content: reply });
+  if (sess.messages.length > 16) sess.messages = sess.messages.slice(-16);
+
   await sendTelegram(chatId, reply, BACK_BTN);
 });
 
