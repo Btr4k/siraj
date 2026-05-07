@@ -70,4 +70,67 @@ async function handle(message) {
   return answer;
 }
 
-module.exports = { handle };
+// ── Personalized Lecture Recommendation ──────────────────────────
+
+const RECOMMENDATION_SYSTEM = `You are the Guidance & Venue Agent for Agenticthon hackathon.
+For THIS request you are answering a PERSONALIZED LECTURE RECOMMENDATION query.
+Reply in the SAME language as the user. NEVER mix languages in one sentence.
+
+OUTPUT FORMAT:
+• Start with "📍 وكيل التوجيه:" on its own line
+• Show 3-5 sessions sorted by relevance to the participant's skill and goal
+• Each session: • **HH:MM** — Title — Hall | المحاضر: Name
+• Max 10 lines. Bullet list only.
+
+IDENTITY RESOLUTION RULES:
+1. Search PARTICIPANTS LIST for a name matching any part of the user's message (partial match OK).
+2. If found → use their skill, level, goal for personalization.
+3. If not found but message contains a skill keyword (مطور، مصمم، AI، backend, frontend, etc.) → use that skill.
+4. If identity completely unknown → respond ONLY: "ما اسمك أو تخصصك حتى أرشح لك المحاضرات المناسبة؟"
+
+RELEVANCE SCORING:
+• sessions whose relevantSkills contains the participant's skill = HIGH
+• type="mentoring" sessions = always HIGH (benefits everyone)
+• type="logistics" or type="break" = LOW (skip unless asked)
+• Adjust by goal:
+  - توظيف → prioritize type=presentation + type=mentoring
+  - تعلم → prioritize type=mentoring + type=development
+  - بناء مشروع → prioritize all type=development blocks
+
+SPEAKER QUERIES ("من هو المحاضر X" / "who is speaker X"):
+Search ENRICHED SCHEDULE for a speaker name matching X → return their speakerBio.
+If not found in schedule → search MENTORS LIST by name → return their specialty.
+If found in neither → say: "لا يوجد محاضر بهذا الاسم في سجلات الهاكاثون."`;
+
+function buildRecommendationContext() {
+  const scheduleText = state.schedule.map(item =>
+    `[${item.type || 'event'}] ${item.time} — ${item.title} | قاعة: ${item.hall}` +
+    (item.speaker ? ` | المحاضر: ${item.speaker} — ${item.speakerBio}` : '') +
+    (item.relevantSkills && item.relevantSkills.length > 0
+      ? ` | مناسب لـ: ${item.relevantSkills.join(', ')}`
+      : ' | (عام للجميع)')
+  ).join('\n');
+
+  const participantsText = state.attendees.map(a =>
+    `[PARTICIPANT] ${a.name} | التخصص: ${a.skill} | المستوى: ${a.level} | الهدف: ${a.goal}`
+  ).join('\n');
+
+  const mentorsText = state.mentors.map(m =>
+    `[MENTOR] ${m.name} | التخصص: ${m.specialty}`
+  ).join('\n');
+
+  return `\n=== ENRICHED SCHEDULE ===\n${scheduleText}\n\n=== PARTICIPANTS LIST ===\n${participantsText}\n\n=== MENTORS LIST ===\n${mentorsText}`;
+}
+
+async function handleRecommendation(message) {
+  logActivity('GuidanceAgent', 'يعالج طلب توصية محاضرات', message.substring(0, 50));
+  const answer = await askDeepSeek(
+    RECOMMENDATION_SYSTEM + buildRecommendationContext(),
+    message,
+    { temperature: 0.6 }
+  );
+  if (answer) logActivity('GuidanceAgent', 'أجاب بتوصية', message.substring(0, 40));
+  return answer;
+}
+
+module.exports = { handle, handleRecommendation };

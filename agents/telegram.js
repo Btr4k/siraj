@@ -56,8 +56,18 @@ function handleCallback(data) {
 }
 
 function buildSchedule() {
+  const dayLabels = ['📆 *اليوم الأول — 7 مايو*', '📆 *اليوم الثاني — 8 مايو*', '📆 *اليوم الثالث — 9 مايو*'];
   let text = '📅 *جدول Agenticthon — 3 أيام*\n━━━━━━━━━━━━━━━━\n\n';
+  let day = 0;
+  let lastTime = null;
   state.schedule.forEach(item => {
+    if (lastTime !== null && item.time <= lastTime) {
+      day++;
+    }
+    if (lastTime === null || item.time <= lastTime) {
+      text += `${dayLabels[day] || `📆 *اليوم ${day + 1}*`}\n`;
+    }
+    lastTime = item.time;
     text += `🕐 \`${item.time}\`  *${item.title}*\n📍 ${item.hall}\n\n`;
   });
   return { text, menu: BACK_BTN };
@@ -67,6 +77,7 @@ function buildPrizes() {
   return {
     text: (
       `🏆 *الجوائز والمزايا*\n━━━━━━━━━━━━━━━━\n\n` +
+      `💰 *جوائز مالية بإجمالي 200,000 ريال سعودي*\n\n` +
       `━━━━━━━━━━━━━━━━\n` +
       `✅ دعم للمشاريع الفائزة\n` +
       `✅ إرشاد احترافي من خبراء الصناعة\n` +

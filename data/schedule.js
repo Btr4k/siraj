@@ -6,16 +6,53 @@ const mentors = [
   { id: 5, name: "د. محمد الدوسري",  specialty: "Data Science & AI",      available: false, team: 1   }
 ];
 
+const ALL_SKILLS = ["AI Engineer","Backend Dev","Frontend Dev","Data Scientist","UX Designer","Product Manager","DevOps","Business Dev"];
+
 const schedule = [
-  { time: "09:00", title: "التسجيل والاستقبال",            hall: "المدخل الرئيسي",   duration: 60  },
-  { time: "10:00", title: "حفل الافتتاح الرسمي",           hall: "الصالة الرياضية",  duration: 60  },
-  { time: "11:00", title: "بداية تطوير المشاريع — اليوم 1", hall: "جميع القاعات",     duration: 480 },
-  { time: "13:30", title: "استراحة الغداء",                 hall: "منطقة الطعام",     duration: 60  },
-  { time: "15:00", title: "جلسات الإرشاد والتوجيه",         hall: "قاعات المرشدين",   duration: 120 },
-  { time: "09:00", title: "تطوير المشاريع — اليوم 2",       hall: "جميع القاعات",     duration: 540 },
-  { time: "09:00", title: "تطوير المشاريع — اليوم 3",       hall: "جميع القاعات",     duration: 360 },
-  { time: "15:00", title: "عروض المشاريع أمام لجنة التحكيم", hall: "الصالة الرياضية", duration: 180 },
-  { time: "19:00", title: "حفل الختام وتوزيع الجوائز",      hall: "الصالة الرياضية", duration: 90  }
+  {
+    time: "09:00", title: "التسجيل والاستقبال", hall: "المدخل الرئيسي", duration: 60,
+    type: "logistics", speaker: null, speakerBio: null, relevantSkills: []
+  },
+  {
+    time: "10:00", title: "حفل الافتتاح الرسمي", hall: "الصالة الرياضية", duration: 60,
+    type: "ceremony", speaker: "قيادة الجامعة والرعاة",
+    speakerBio: "كلمة ترحيب من رئيس الجامعة وشركاء الهاكاثون بيوند لتقنية المعلومات.",
+    relevantSkills: []
+  },
+  {
+    time: "11:00", title: "بداية تطوير المشاريع — اليوم 1", hall: "جميع القاعات", duration: 480,
+    type: "development", speaker: null, speakerBio: null, relevantSkills: ALL_SKILLS
+  },
+  {
+    time: "13:30", title: "استراحة الغداء", hall: "منطقة الطعام", duration: 60,
+    type: "break", speaker: null, speakerBio: null, relevantSkills: []
+  },
+  {
+    time: "15:00", title: "جلسات الإرشاد والتوجيه", hall: "قاعات المرشدين", duration: 120,
+    type: "mentoring", speaker: "مرشدو الهاكاثون",
+    speakerBio: "جلسات مباشرة مع مرشدين متخصصين في AI/ML، DevOps، المنتج وUX، ريادة الأعمال، وعلم البيانات.",
+    relevantSkills: ALL_SKILLS
+  },
+  {
+    time: "09:00", title: "تطوير المشاريع — اليوم 2", hall: "جميع القاعات", duration: 540,
+    type: "development", speaker: null, speakerBio: null, relevantSkills: ALL_SKILLS
+  },
+  {
+    time: "09:00", title: "تطوير المشاريع — اليوم 3", hall: "جميع القاعات", duration: 360,
+    type: "development", speaker: null, speakerBio: null, relevantSkills: ALL_SKILLS
+  },
+  {
+    time: "15:00", title: "عروض المشاريع أمام لجنة التحكيم", hall: "الصالة الرياضية", duration: 180,
+    type: "presentation", speaker: "لجنة التحكيم",
+    speakerBio: "لجنة من خبراء الصناعة والأكاديميين تقيّم المشاريع على أساس الابتكار والتنفيذ والأثر.",
+    relevantSkills: ALL_SKILLS
+  },
+  {
+    time: "19:00", title: "حفل الختام وتوزيع الجوائز", hall: "الصالة الرياضية", duration: 90,
+    type: "ceremony", speaker: "قيادة الجامعة وشركاء الهاكاثون",
+    speakerBio: "إعلان الفائزين وتوزيع الجوائز والشهادات وجوائز بإجمالي 200,000 ريال.",
+    relevantSkills: []
+  }
 ];
 
 const venue = {

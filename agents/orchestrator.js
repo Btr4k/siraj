@@ -33,6 +33,15 @@ const ROUTES = [
     ]
   },
   {
+    agent: 'recommendation',
+    keywords: [
+      'المحاضرات المناسبة','رتب لي جدول','جدول الحضور','توصية محاضرات','محاضرات مناسبة',
+      'ما يناسبني','المحاضر','معلومات عن المحاضر','من هو المحاضر',
+      'اقترح لي','رشح لي','ما المحاضرات',
+      'أنا مهندس','أنا مصمم','أنا مطور','تخصصي','مستواي'
+    ]
+  },
+  {
     agent: 'guidance',
     keywords: [
       'جدول','موقع','قاعة','مسار','مسارات','مواقف','واي فاي','wifi','wi-fi',
@@ -91,6 +100,9 @@ async function route(userMessage) {
       break;
     case 'attendance':
       answer = await attendanceAgent.handle(userMessage);
+      break;
+    case 'recommendation':
+      answer = await guidanceAgent.handleRecommendation(userMessage);
       break;
     case 'guidance':
       answer = await guidanceAgent.handle(userMessage);
