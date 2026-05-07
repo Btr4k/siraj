@@ -289,6 +289,12 @@
     }
     .quick-q:hover { background: var(--purple-l); }
 
+    .msg-bot strong { font-weight: 800; color: var(--purple-d); }
+    .msg-bot code   { background: var(--purple-m); padding: 1px 5px; border-radius: 4px; font-size: .78rem; }
+    .msg-bot ul     { list-style: none; padding: 0; margin: 6px 0; display: flex; flex-direction: column; gap: 4px; }
+    .msg-bot li     { background: rgba(124,58,237,0.07); border-right: 2px solid var(--purple-m); border-radius: 6px; padding: 4px 8px; }
+    .msg-bot p      { margin: 3px 0; }
+
     /* ── Admin form ── */
     .form-group { margin-bottom: 1rem; }
     label { display: block; font-size: .85rem; font-weight: 700; color: var(--text); margin-bottom: .4rem; }
@@ -623,6 +629,28 @@ function showError(msg) {
   setTimeout(() => card.style.animation = '', 400);
 }
 
+// ═══ Markdown renderer ═══════════════════════════════════════
+function renderMd(raw) {
+  if (!raw) return '';
+  const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // strip agent prefix like "📍 وكيل التوجيه:"
+  let body = raw.trim();
+  const pm = body.match(/^([^\n:：]{1,60}[:：])\s*/);
+  if (pm) body = body.slice(pm[0].length).trim();
+  let s = esc(body);
+  s = s.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+  const lines = s.split('\n');
+  let out = '', inList = false;
+  for (const ln of lines) {
+    const bl = ln.match(/^[•\-\*]\s+(.*)/);
+    if (bl) { if (!inList) { out += '<ul>'; inList = true; } out += `<li>${bl[1]}</li>`; }
+    else { if (inList) { out += '</ul>'; inList = false; } if (ln.trim()) out += `<p>${ln}</p>`; }
+  }
+  if (inList) out += '</ul>';
+  return out;
+}
+
 // ═══ Public AI Assistant ══════════════════════════════════════
 const messagesEl = document.getElementById('aiMessages');
 
@@ -646,7 +674,7 @@ async function askPublic(preset) {
       body: JSON.stringify({ question: q })
     });
     const data = await res.json();
-    thinking.textContent = data.answer || 'لا يوجد رد في الوقت الحالي.';
+    thinking.innerHTML = renderMd(data.answer) || 'لا يوجد رد في الوقت الحالي.';
   } catch {
     thinking.textContent = 'تعذّر الاتصال بالوكيل، حاول مجدداً.';
   } finally {
