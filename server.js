@@ -13,6 +13,7 @@ const { checkInAll, checkParkingLoad, detectIssues }     = require('./agents/reg
 const { state, logActivity, resolveAlert, checkinAttendee, addAlert, linkTelegramChat } = require('./data/state');
 const { pushToChat } = require('./agents/notifier');
 const { MAIN_MENU, BACK_BTN, getWelcomeText, handleCallback, setCommands } = require('./agents/telegram');
+const onboarding = require('./agents/onboarding');
 const { processCommand }                                 = require('./agents/dataManager');
 
 const sessions    = new Map(); // admin token → { expiresAt }
@@ -227,6 +228,12 @@ app.post('/webhook', async (req, res) => {
       return;
     }
 
+    // Onboarding buttons have priority
+    if (cb.data.startsWith('ob_')) {
+      await onboarding.handleCallback(chatId, cb.data, sendTelegram);
+      return;
+    }
+
     const result = handleCallback(cb.data);
     if (result) await sendTelegram(chatId, result.text, result.menu);
     return;
@@ -241,7 +248,23 @@ app.post('/webhook', async (req, res) => {
 
   if (text.startsWith('/start') || text.startsWith('/help')) {
     chatSessions.delete(String(chatId));
-    await sendTelegram(chatId, getWelcomeText(), MAIN_MENU);
+    // Already registered? Greet them. Otherwise start onboarding.
+    const linked = state.attendees.find(a => a.telegramChatId === String(chatId));
+    if (linked) {
+      const fn = linked.name.split(' ')[0];
+      await sendTelegram(chatId,
+        `أهلاً مجدداً *${fn}*\\! 👋\nكيف أساعدك اليوم؟`,
+        MAIN_MENU
+      );
+    } else {
+      await onboarding.startOnboarding(chatId, sendTelegram);
+    }
+    return;
+  }
+
+  // ── Onboarding (name text input) ────────────────────────────
+  if (onboarding.isOnboarding(chatId)) {
+    await onboarding.handleText(chatId, text, sendTelegram);
     return;
   }
 
