@@ -201,11 +201,34 @@ app.post('/api/logout', authMiddleware, (req, res) => {
   res.json({ ok: true });
 });
 
+// Convert standard markdown (from DeepSeek) → Telegram Markdown v1
+function toTgMd(text) {
+  return text
+    .replace(/\*\*([^*\n]+)\*\*/g, '*$1*')   // **bold** → *bold*
+    .replace(/^#{1,6}\s+(.+)$/gm, '*$1*')    // ## Header → *Header*
+    .replace(/\n{3,}/g, '\n\n')               // max 2 consecutive newlines
+    .trim();
+}
+
 async function sendTelegram(chatId, text, replyMarkup = null) {
   try {
-    const payload = { chat_id: chatId, text, parse_mode: 'Markdown', disable_web_page_preview: false };
-    if (replyMarkup) payload.reply_markup = replyMarkup;
-    await axios.post(`${TG}/sendMessage`, payload);
+    const clean = toTgMd(text);
+    // Telegram max = 4096 chars; split into chunks if needed
+    const chunks = [];
+    for (let i = 0; i < clean.length; i += 4000) {
+      chunks.push(clean.slice(i, i + 4000));
+    }
+    for (let i = 0; i < chunks.length; i++) {
+      const payload = {
+        chat_id: chatId,
+        text: chunks[i],
+        parse_mode: 'Markdown',
+        disable_web_page_preview: true
+      };
+      // Only attach the menu to the last chunk
+      if (i === chunks.length - 1 && replyMarkup) payload.reply_markup = replyMarkup;
+      await axios.post(`${TG}/sendMessage`, payload);
+    }
   } catch (e) { console.error('TG error:', e.message); }
 }
 
