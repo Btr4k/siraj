@@ -47,9 +47,20 @@ ${absent.length > 0 ? absent.map(a => `✗ ${a.name} (${a.skill})`).join('\n') :
 ${state.alerts.length > 0 ? state.alerts.map(a => `⚠️ ${a.message}`).join('\n') : '- No active alerts'}`;
 }
 
-async function handle(message) {
+function buildUserBlock(userProfile = {}) {
+  if (!userProfile.name) return '';
+  const fn = userProfile.name.split(' ')[0];
+  const self = userProfile.attendeeId
+    ? state.attendees.find(a => a.id === userProfile.attendeeId)
+    : null;
+  const selfStatus = self ? (self.checkedIn ? 'حاضر ✓' : 'لم يسجل حضوره بعد') : null;
+  return `\n=== CURRENT USER ===\nName: ${userProfile.name} — address as "${fn}"${selfStatus ? ` | Status: ${selfStatus}` : ''}\n`;
+}
+
+async function handle(message, ctx = {}) {
+  const { history = [], userProfile = {} } = ctx;
   logActivity('AttendanceAgent', 'يعالج سؤالاً', message.substring(0, 50));
-  const answer = await askDeepSeek(SYSTEM + buildContext(), message, { temperature: 0.3 });
+  const answer = await askDeepSeek(SYSTEM + buildUserBlock(userProfile) + buildContext(), message, { temperature: 0.3, history });
   if (answer) logActivity('AttendanceAgent', 'أجاب', message.substring(0, 40));
   return answer;
 }

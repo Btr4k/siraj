@@ -61,9 +61,17 @@ ${availableMentors.map(m => `✓ [MENTOR] ${m.name} — ${m.specialty}`).join('\
 Busy mentors: ${state.mentors.filter(m => !m.available).map(m => `✗ [MENTOR] ${m.name}`).join(', ') || 'None'}`;
 }
 
-async function handle(message) {
+function buildUserBlock(userProfile = {}) {
+  if (!userProfile.name) return '';
+  const fn = userProfile.name.split(' ')[0];
+  if (!userProfile.skill) return `\n=== CURRENT USER ===\nName: ${userProfile.name} — address as "${fn}"\n`;
+  return `\n=== CURRENT USER ===\nName: ${userProfile.name} | Skill: ${userProfile.skill} | Team: ${userProfile.team ? '#'+userProfile.team : 'unassigned'}\n→ Address as "${fn}". If asked about their team, highlight it specifically.\n`;
+}
+
+async function handle(message, ctx = {}) {
+  const { history = [], userProfile = {} } = ctx;
   logActivity('MatchmakingAgent', 'يعالج سؤالاً', message.substring(0, 50));
-  const answer = await askDeepSeek(SYSTEM + buildContext(), message, { temperature: 0.4 });
+  const answer = await askDeepSeek(SYSTEM + buildUserBlock(userProfile) + buildContext(), message, { temperature: 0.4, history });
   if (answer) logActivity('MatchmakingAgent', 'أجاب', message.substring(0, 40));
   return answer;
 }

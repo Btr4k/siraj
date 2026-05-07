@@ -651,6 +651,14 @@ function renderMd(raw) {
   return out;
 }
 
+// ═══ Session management ════════════════════════════════════════
+let sirajSessionId = localStorage.getItem('siraj_chat_session') || null;
+
+function saveSession(id) {
+  sirajSessionId = id;
+  localStorage.setItem('siraj_chat_session', id);
+}
+
 // ═══ Public AI Assistant ══════════════════════════════════════
 const messagesEl = document.getElementById('aiMessages');
 
@@ -671,15 +679,31 @@ async function askPublic(preset) {
     const res = await fetch('/api/public/ask', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question: q })
+      body: JSON.stringify({ question: q, sessionId: sirajSessionId })
     });
     const data = await res.json();
+    if (data.sessionId) saveSession(data.sessionId);
     thinking.innerHTML = renderMd(data.answer) || 'لا يوجد رد في الوقت الحالي.';
   } catch {
     thinking.textContent = 'تعذّر الاتصال بالوكيل، حاول مجدداً.';
   } finally {
     btn.disabled = false;
     btn.textContent = 'إرسال';
+  }
+}
+
+async function publicAction(action, data = {}) {
+  try {
+    const res = await fetch('/api/public/action', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action, data, sessionId: sirajSessionId })
+    });
+    const result = await res.json();
+    if (result.message) appendMsg(result.success ? `✅ ${result.message}` : `❌ ${result.message}`, 'bot');
+    return result;
+  } catch {
+    appendMsg('تعذّر تنفيذ الإجراء، حاول مجدداً.', 'bot');
   }
 }
 

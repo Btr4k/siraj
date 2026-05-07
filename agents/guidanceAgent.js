@@ -63,9 +63,16 @@ function buildContext() {
   return `\n=== LIVE STATS ===\nParking load: ~${pct}% (based on check-ins)\nActive alerts: ${state.stats.alertsActive}`;
 }
 
-async function handle(message) {
+function buildUserBlock(userProfile = {}) {
+  if (!userProfile.name) return '';
+  const fn = userProfile.name.split(' ')[0];
+  return `\n=== CURRENT USER ===\nName: ${userProfile.name} — address as "${fn}"${userProfile.skill ? ` | Skill: ${userProfile.skill}` : ''}\n`;
+}
+
+async function handle(message, ctx = {}) {
+  const { history = [], userProfile = {} } = ctx;
   logActivity('GuidanceAgent', 'يعالج سؤالاً', message.substring(0, 50));
-  const answer = await askDeepSeek(SYSTEM + STATIC + buildContext(), message, { temperature: 0.5 });
+  const answer = await askDeepSeek(SYSTEM + buildUserBlock(userProfile) + STATIC + buildContext(), message, { temperature: 0.5, history });
   if (answer) logActivity('GuidanceAgent', 'أجاب', message.substring(0, 40));
   return answer;
 }
@@ -122,12 +129,13 @@ function buildRecommendationContext() {
   return `\n=== ENRICHED SCHEDULE ===\n${scheduleText}\n\n=== PARTICIPANTS LIST ===\n${participantsText}\n\n=== MENTORS LIST ===\n${mentorsText}`;
 }
 
-async function handleRecommendation(message) {
+async function handleRecommendation(message, ctx = {}) {
+  const { history = [], userProfile = {} } = ctx;
   logActivity('GuidanceAgent', 'يعالج طلب توصية محاضرات', message.substring(0, 50));
   const answer = await askDeepSeek(
     RECOMMENDATION_SYSTEM + buildRecommendationContext(),
     message,
-    { temperature: 0.6 }
+    { temperature: 0.6, history }
   );
   if (answer) logActivity('GuidanceAgent', 'أجاب بتوصية', message.substring(0, 40));
   return answer;

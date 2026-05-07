@@ -10,12 +10,31 @@ const rateLimit  = require('express-rate-limit');
 const { route }                                          = require('./agents/orchestrator');
 const { formTeams }                                      = require('./agents/matchmaker');
 const { checkInAll, checkParkingLoad, detectIssues }     = require('./agents/registrar');
-const { state, logActivity, resolveAlert, checkinAttendee } = require('./data/state');
+const { state, logActivity, resolveAlert, checkinAttendee, addAlert } = require('./data/state');
 const { MAIN_MENU, BACK_BTN, getWelcomeText, handleCallback, setCommands } = require('./agents/telegram');
 const { processCommand }                                 = require('./agents/dataManager');
 
-const sessions    = new Map(); // token → { expiresAt }
+const sessions    = new Map(); // admin token → { expiresAt }
 const SESSION_TTL = 8 * 60 * 60 * 1000;
+
+// ── Public chat sessions: sessionId → { messages, userProfile, expiresAt } ──
+const chatSessions = new Map();
+const CHAT_TTL     = 2 * 60 * 60 * 1000; // 2 hours
+
+function getOrCreateChatSession(sessionId) {
+  if (sessionId) {
+    const existing = chatSessions.get(sessionId);
+    if (existing && Date.now() < existing.expiresAt) {
+      existing.expiresAt = Date.now() + CHAT_TTL; // refresh
+      return { sid: sessionId, sess: existing };
+    }
+    chatSessions.delete(sessionId);
+  }
+  const sid  = crypto.randomBytes(16).toString('hex');
+  const sess = { messages: [], userProfile: {}, expiresAt: Date.now() + CHAT_TTL };
+  chatSessions.set(sid, sess);
+  return { sid, sess };
+}
 
 function authMiddleware(req, res, next) {
   const token = req.headers['x-auth-token'];
@@ -46,12 +65,68 @@ const publicAskLimiter = rateLimit({
   message: { error: 'طلبات كثيرة، حاول بعد دقيقة / Too many requests, try again in a minute.' }
 });
 
-// Public: participant AI Q&A (no auth)
+// Public: participant AI Q&A with multi-turn memory
 app.post('/api/public/ask', publicAskLimiter, async (req, res) => {
-  const { question } = req.body || {};
+  const { question, sessionId } = req.body || {};
   if (!question) return res.status(400).json({ error: 'missing question' });
   if (question.length > 500) return res.status(400).json({ error: 'السؤال طويل جداً / Question too long (max 500 chars).' });
-  res.json({ answer: await route(question) });
+
+  const { sid, sess } = getOrCreateChatSession(sessionId);
+
+  // History = previous turns (before current message)
+  const history = [...sess.messages];
+
+  // Append current user turn
+  sess.messages.push({ role: 'user', content: question });
+
+  const answer = await route(question, history, sess.userProfile);
+
+  // Append assistant turn
+  if (answer) sess.messages.push({ role: 'assistant', content: answer });
+
+  // Keep last 16 messages (8 full turns)
+  if (sess.messages.length > 16) sess.messages = sess.messages.slice(-16);
+
+  res.json({ answer, sessionId: sid });
+});
+
+const publicActionLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'طلبات كثيرة، حاول بعد دقيقة.' }
+});
+
+// Public: participant self-service actions (no auth)
+app.post('/api/public/action', publicActionLimiter, async (req, res) => {
+  const { action, data, sessionId } = req.body || {};
+  if (!action) return res.status(400).json({ error: 'missing action' });
+
+  const sess     = sessionId ? chatSessions.get(sessionId) : null;
+  const userName = sess?.userProfile?.name || data?.name || 'مشارك';
+
+  switch (action) {
+    case 'request_mentor': {
+      const { projectArea } = data || {};
+      const msg = `🆘 طلب مرشد: ${userName} — المجال: ${projectArea || 'غير محدد'}`;
+      addAlert(msg, 'warning');
+      logActivity('PublicAction', 'طلب مرشد', userName);
+      return res.json({ success: true, message: 'تم تسجيل طلبك! سيتواصل معك المنظمون قريباً.' });
+    }
+    case 'team_interest': {
+      const { skill } = data || {};
+      logActivity('PublicAction', 'اهتمام بتشكيل فريق', `${userName} (${skill || '؟'})`);
+      return res.json({ success: true, message: 'تم تسجيل اهتمامك! سنتواصل معك للتنسيق.' });
+    }
+    case 'self_checkin': {
+      const identifier = data?.name || userName;
+      const result = checkinAttendee(identifier);
+      return res.json(result);
+    }
+    default:
+      return res.status(400).json({ error: `إجراء غير معروف: ${action}` });
+  }
 });
 
 app.post('/api/login', (req, res) => {

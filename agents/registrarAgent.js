@@ -71,9 +71,17 @@ ${state.mentors.map(m =>
 ).join('\n')}`;
 }
 
-async function handle(message) {
+function buildUserBlock(userProfile = {}) {
+  if (!userProfile.name) return '';
+  const fn = userProfile.name.split(' ')[0];
+  if (!userProfile.skill) return `\n=== CURRENT USER ===\nName: ${userProfile.name} — address as "${fn}"\n`;
+  return `\n=== CURRENT USER ===\nName: ${userProfile.name} | Skill: ${userProfile.skill} | Level: ${userProfile.level} | Goal: ${userProfile.goal} | Team: ${userProfile.team ? '#'+userProfile.team : 'unassigned'}\n→ Address as "${fn}". If asked about themselves, highlight their own entry.\n`;
+}
+
+async function handle(message, ctx = {}) {
+  const { history = [], userProfile = {} } = ctx;
   logActivity('RegistrationAgent', 'يعالج سؤالاً', message.substring(0, 50));
-  const answer = await askDeepSeek(SYSTEM + buildContext(), message, { temperature: 0.4 });
+  const answer = await askDeepSeek(SYSTEM + buildUserBlock(userProfile) + buildContext(), message, { temperature: 0.4, history });
   if (answer) logActivity('RegistrationAgent', 'أجاب', message.substring(0, 40));
   return answer;
 }
