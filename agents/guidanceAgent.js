@@ -80,10 +80,25 @@ function buildUserBlock(userProfile = {}) {
   return `\n=== CURRENT USER ===\nName: ${userProfile.name} — address as "${fn}"${userProfile.skill ? ` | Skill: ${userProfile.skill}` : ''}\n`;
 }
 
+const LOCATION_PATTERN = /موقع|كيف أصل|كيف اصل|طريق|اتجاه|مكان|وين|أين|الصالة|الجامعة|location|direction|how to get|venue|where|parking|مواقف|waze|maps/i;
+const WIFI_PATTERN    = /wifi|wi-fi|واي فاي|واي-فاي|شبكة|كلمة المرور|password|internet|نت/i;
+
+const MAPS_BLOCK = `\n\n🧭 **الملاحة الفورية:**\n• [🗺 افتح في خرائط Google](https://maps.google.com/?q=جامعة+الأمير+سطام+بن+عبدالعزيز+الخرج+الصالة+الرياضية)\n• [🚗 افتح في Waze](https://waze.com/ul?q=Prince+Sattam+University+Sports+Hall+Al-Kharj)`;
+
+function wifiBlock() {
+  const pw = process.env.WIFI_PASSWORD || 'hackathon2025';
+  return `\n\n📶 **بيانات الاتصال (اضغط للنسخ):**\n• الشبكة: \`Siraj-Event\`\n• كلمة المرور: \`${pw}\``;
+}
+
 async function handle(message, ctx = {}) {
   const { history = [], userProfile = {} } = ctx;
   logActivity('GuidanceAgent', 'يعالج سؤالاً', message.substring(0, 50));
-  const answer = await askDeepSeek(SYSTEM + buildUserBlock(userProfile) + STATIC + buildContext(), message, { temperature: 0.5, history });
+  let answer = await askDeepSeek(SYSTEM + buildUserBlock(userProfile) + STATIC + buildContext(), message, { temperature: 0.5, history });
+  if (answer) {
+    // Agent actions: inject guaranteed data blocks — never rely on LLM to reproduce them
+    if (LOCATION_PATTERN.test(message)) answer += MAPS_BLOCK;
+    if (WIFI_PATTERN.test(message))    answer += wifiBlock();
+  }
   if (answer) logActivity('GuidanceAgent', 'أجاب', message.substring(0, 40));
   return answer;
 }
