@@ -148,13 +148,15 @@ If not found in schedule → search MENTORS LIST by name → return their specia
 If found in neither → say: "لا يوجد محاضر بهذا الاسم في سجلات الهاكاثون."`;
 
 function buildRecommendationContext() {
-  const scheduleText = state.schedule.map(item =>
-    `[${item.type || 'event'}] ${item.time} — ${item.title} | قاعة: ${item.hall}` +
-    (item.speaker ? ` | المحاضر: ${item.speaker} — ${item.speakerBio}` : '') +
-    (item.relevantSkills && item.relevantSkills.length > 0
-      ? ` | مناسب لـ: ${item.relevantSkills.join(', ')}`
-      : ' | (عام للجميع)')
-  ).join('\n');
+  const scheduleText = state.schedule.map(item => {
+    const dayTag = item.day ? `اليوم${item.day} ` : '';
+    const displayTitle = item.titleAr ? `${item.titleAr} / ${item.title}` : item.title;
+    return `[${item.type || 'event'}] ${dayTag}${item.time} — ${displayTitle} | قاعة: ${item.hall}` +
+      (item.speaker ? ` | المحاضر: ${item.speaker} — ${item.speakerBio}` : '') +
+      (item.relevantSkills && item.relevantSkills.length > 0
+        ? ` | مناسب لـ: ${item.relevantSkills.join(', ')}`
+        : ' | (عام للجميع)');
+  }).join('\n');
 
   const participantsText = state.attendees.map(a =>
     `[PARTICIPANT] ${a.name} | التخصص: ${a.skill} | المستوى: ${a.level} | الهدف: ${a.goal}`

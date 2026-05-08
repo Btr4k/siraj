@@ -27,20 +27,36 @@ const schedule = [
     relevantSkills: ALL_SKILLS
   },
   {
-    day: 1, time: "16:00", title: "ورشة العمل الأولى", hall: "قاعات العمل", duration: 60,
-    type: "development", speaker: null, speakerBio: null, relevantSkills: ALL_SKILLS
+    day: 1, time: "16:00", duration: 60, hall: "قاعات العمل", type: "workshop",
+    title: "Why Most Agent Demos Are Security Disasters",
+    titleAr: "أمن وكلاء الذكاء الاصطناعي",
+    speaker: "د. فهدة المرشد",
+    speakerBio: "ورشة متخصصة في أمن وكلاء الذكاء الاصطناعي — كيف تتحول العروض التجريبية إلى ثغرات أمنية وكيف تبني وكلاء آمنة.",
+    relevantSkills: ["AI Engineer", "Backend Dev", "DevOps"]
   },
   {
-    day: 1, time: "17:00", title: "ورشة العمل الثانية", hall: "قاعات العمل", duration: 60,
-    type: "development", speaker: null, speakerBio: null, relevantSkills: ALL_SKILLS
+    day: 1, time: "17:00", duration: 60, hall: "قاعات العمل", type: "workshop",
+    title: "AI Agents in Microbiology: From Data to Discovery",
+    titleAr: "تطبيقات الذكاء الاصطناعي في الأحياء الدقيقة",
+    speaker: "د. سارة الحماد",
+    speakerBio: "استكشاف تطبيقات وكلاء الذكاء الاصطناعي في علم الأحياء الدقيقة — من تحليل البيانات البيولوجية إلى اكتشاف الأنماط.",
+    relevantSkills: ["AI Engineer", "Data Scientist"]
   },
   {
-    day: 1, time: "18:00", title: "ورشة العمل الثالثة", hall: "قاعات العمل", duration: 60,
-    type: "development", speaker: null, speakerBio: null, relevantSkills: ALL_SKILLS
+    day: 1, time: "18:00", duration: 60, hall: "قاعات العمل", type: "workshop",
+    title: "Foundation Models and Agentic AI in Data-Driven Diagnostics",
+    titleAr: "النماذج التأسيسية والتشخيص الذكي",
+    speaker: "د. محسن بلال",
+    speakerBio: "كيف تُستخدم Foundation Models وأنظمة الوكلاء في التشخيص الذكي المبني على البيانات.",
+    relevantSkills: ["AI Engineer", "Data Scientist", "Backend Dev"]
   },
   {
-    day: 1, time: "19:00", title: "ورشة العمل الرابعة", hall: "قاعات العمل", duration: 60,
-    type: "development", speaker: null, speakerBio: null, relevantSkills: ALL_SKILLS
+    day: 1, time: "19:00", duration: 60, hall: "قاعات العمل", type: "workshop",
+    title: "دراسة الجدوى المالية للمشروع",
+    titleAr: "التخطيط المالي والاستثماري",
+    speaker: "د. أحمد عجينة",
+    speakerBio: "ورشة عملية في إعداد دراسة الجدوى المالية للمشاريع التقنية — التخطيط المالي وجذب المستثمرين.",
+    relevantSkills: ["Business Dev", "Product Manager"]
   },
   {
     day: 1, time: "20:00", title: "انتهاء اليوم الأول", hall: "الصالة الرياضية", duration: 0,
