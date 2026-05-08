@@ -667,14 +667,17 @@ function showError(msg) {
 // ═══ Markdown renderer ═══════════════════════════════════════
 function renderMd(raw) {
   if (!raw) return '';
-  const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const escFn = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   // strip agent prefix like "📍 وكيل التوجيه:"
   let body = raw.trim();
   const pm = body.match(/^([^\n:：]{1,60}[:：])\s*/);
   if (pm) body = body.slice(pm[0].length).trim();
-  let s = esc(body);
+  let s = escFn(body);
   s = s.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
   s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+  // [label](url) → clickable link (https only — prevents javascript: injection)
+  s = s.replace(/\[([^\]]{1,80})\]\((https?:\/\/[^)\s]{1,300})\)/g,
+    (_, label, url) => `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color:var(--purple);font-weight:700;">${label}</a>`);
   const lines = s.split('\n');
   let out = '', inList = false;
   for (const ln of lines) {

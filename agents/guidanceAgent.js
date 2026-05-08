@@ -56,6 +56,13 @@ Day 3 (9 May): 09:00 Final Dev | 15:00 Presentations | 19:00 Awards Ceremony
 P1 — North Entrance: 150 spots
 P2 — South Entrance: 80 spots (backup)
 Wi-Fi: Network: Siraj-Event | Password: ${process.env.WIFI_PASSWORD || 'hackathon2025'}
+Google Maps Link: [🗺 افتح الموقع في خرائط Google](https://maps.google.com/?q=جامعة+الأمير+سطام+بن+عبدالعزيز+الخرج+الصالة+الرياضية)
+Waze Link: [🚗 افتح في Waze](https://waze.com/ul?q=جامعة+الأمير+سطام+بن+عبدالعزيز+الخرج)
+
+AGENT ACTION RULE — Location/Directions queries:
+When the user asks about location, how to get there, parking, or directions →
+ALWAYS include both clickable links (Google Maps + Waze) in your response, not just text.
+A real agent gives the user a link they can tap — not just "follow the signs".
 
 === JUDGING ===
 1. Team registration → 2. Initial screening → 3. 3-day sprint → 4. Final presentation`;
