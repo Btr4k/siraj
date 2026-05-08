@@ -56,19 +56,20 @@ function handleCallback(data) {
 }
 
 function buildSchedule() {
-  const dayLabels = ['📆 *اليوم الأول — 7 مايو*', '📆 *اليوم الثاني — 8 مايو*', '📆 *اليوم الثالث — 9 مايو*'];
+  const dayHeaders = {
+    1: '📆 *اليوم الأول — 7 مايو* _(ONBOARDING · FOUNDATIONS)_',
+    2: '📆 *اليوم الثاني — 8 مايو* _(DEEP WORK · MENTORSHIP)_',
+    3: '📆 *اليوم الثالث — 9 مايو* _(PITCH · JUDGING · AWARDS)_'
+  };
   let text = '📅 *جدول Agenticthon — 3 أيام*\n━━━━━━━━━━━━━━━━\n\n';
-  let day = 0;
-  let lastTime = null;
+  let currentDay = 0;
   state.schedule.forEach(item => {
-    if (lastTime !== null && item.time <= lastTime) {
-      day++;
+    const d = item.day || 1;
+    if (d !== currentDay) {
+      currentDay = d;
+      text += `${dayHeaders[d] || `📆 *اليوم ${d}*`}\n`;
     }
-    if (lastTime === null || item.time <= lastTime) {
-      text += `${dayLabels[day] || `📆 *اليوم ${day + 1}*`}\n`;
-    }
-    lastTime = item.time;
-    text += `🕐 \`${item.time}\`  *${item.title}*\n📍 ${item.hall}\n\n`;
+    text += `🕐 \`${item.time}\`  *${item.title}*\n`;
   });
   return { text, menu: BACK_BTN };
 }

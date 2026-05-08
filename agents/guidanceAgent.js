@@ -47,10 +47,21 @@ Team size: 2–5 members
 5. أنظمة متعددة الوكلاء (Multi-Agent Systems) — تعاون الوكلاء
 6. تواصل وكيل إلى وكيل (Agent-to-Agent / A2A) — بروتوكولات A2A
 
-=== SCHEDULE ===
-Day 1 (7 May): 09:00 Registration | 10:00 Opening | 11:00 Hackathon Start | 13:30 Lunch | 15:00 Mentoring
-Day 2 (8 May): 09:00 Development | 13:30 Lunch | 15:00 Mentoring
-Day 3 (9 May): 09:00 Final Dev | 15:00 Presentations | 19:00 Awards Ceremony
+=== SCHEDULE (Arabia Standard Time — AST GMT+3) ===
+Day 1 — 7 May 2026 (ONBOARDING · FOUNDATIONS — اليوم الأول):
+  10:00 وصول الفرق والتسجيل | 13:00 حفل الافتتاح والكلمات الترحيبية
+  14:00 عرض تعريفي بمحاور الهاكاثون | 16:00 ورشة العمل الأولى
+  17:00 ورشة العمل الثانية | 18:00 ورشة العمل الثالثة
+  19:00 ورشة العمل الرابعة | 20:00 انتهاء اليوم الأول
+
+Day 2 — 8 May 2026 (DEEP WORK · MENTORSHIP — اليوم الثاني):
+  13:00 بدء العمل على المشاريع | 14:00 ورشة العمل الأولى
+  16:00 ورشة العمل الثانية | 17:00 ورشة العمل الثالثة
+  18:00 ورشة العمل الرابعة | 19:00 اعرض فكرتك | 20:00 انتهاء اليوم الثاني
+
+Day 3 — 9 May 2026 (PITCH · JUDGING · AWARDS — اليوم الثالث):
+  08:00 آخر فرصة لتسليم الأعمال | 10:00 بدء التقييم من لجنة التحكيم
+  15:00 انتهاء التقييم | 19:00 حفل الختام وتكريم الفائزين
 
 === VENUE & PARKING ===
 P1 — North Entrance: 150 spots
