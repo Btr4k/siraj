@@ -154,7 +154,7 @@ app.post('/api/public/ask', publicAskLimiter, async (req, res) => {
   // Keep last 16 messages (8 full turns)
   if (sess.messages.length > 16) sess.messages = sess.messages.slice(-16);
 
-  res.json({ answer, sessionId: sid });
+  res.json({ answer, sessionId: sid, userProfile: sess.userProfile });
 });
 
 const publicActionLimiter = rateLimit({

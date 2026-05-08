@@ -289,6 +289,33 @@
     }
     .quick-q:hover { background: var(--purple-l); }
 
+    .action-btns {
+      display: flex; flex-wrap: wrap; gap: .4rem;
+      padding: .5rem .625rem;
+      border-top: 1px solid var(--border);
+    }
+    .action-btn {
+      background: var(--green-l);
+      border: 1px solid #6EE7B7;
+      border-radius: 20px;
+      padding: .3rem .75rem;
+      font-size: .75rem;
+      color: var(--green);
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 700;
+      transition: all .15s;
+    }
+    .action-btn:hover { background: #D1FAE5; }
+
+    .user-badge {
+      display: inline-flex; align-items: center; gap: .3rem;
+      background: var(--purple-t); border: 1px solid var(--purple-m);
+      border-radius: 20px; padding: .2rem .6rem;
+      font-size: .72rem; font-weight: 700; color: var(--purple);
+      margin-right: .5rem;
+    }
+
     .msg-bot strong { font-weight: 800; color: var(--purple-d); }
     .msg-bot code   { background: var(--purple-m); padding: 1px 5px; border-radius: 4px; font-size: .78rem; }
     .msg-bot ul     { list-style: none; padding: 0; margin: 6px 0; display: flex; flex-direction: column; gap: 4px; }
@@ -519,22 +546,30 @@
           <div class="ai-panel">
             <div class="ai-header">
               <div class="ai-dot"></div>
-              <span class="ai-header-text">وكيل سراج — متاح 24/7</span>
+              <span class="ai-header-text" id="aiHeaderText">وكيل سراج — متاح 24/7</span>
             </div>
+            <!-- Quick buttons — same topics as Telegram MAIN_MENU -->
             <div class="quick-qs">
-              <button class="quick-q" onclick="askPublic('ما هو جدول اليوم الأول؟')">📅 جدول اليوم</button>
-              <button class="quick-q" onclick="askPublic('كيف يمكنني تشكيل فريق؟')">👥 تشكيل فريق</button>
-              <button class="quick-q" onclick="askPublic('ما هي معايير التحكيم؟')">⚖️ التحكيم</button>
+              <button class="quick-q" onclick="askPublic('ما هو جدول الهاكاثون؟')">📅 الجدول</button>
               <button class="quick-q" onclick="askPublic('ما هي الجوائز وكيف توزع؟')">🏆 الجوائز</button>
-              <button class="quick-q" onclick="askPublic('أين WiFi الفعالية وما كلمة المرور؟')">📶 الواي فاي</button>
+              <button class="quick-q" onclick="askPublic('ما هي مسارات التنافس؟')">🛤 المسارات</button>
               <button class="quick-q" onclick="askPublic('من هم المرشدون المتاحون؟')">🎓 المرشدون</button>
+              <button class="quick-q" onclick="askPublic('ما هي الفرق المكوّنة؟')">👥 الفرق</button>
+              <button class="quick-q" onclick="askPublic('أين الموقع وكيف أصل؟')">📍 الموقع</button>
+              <button class="quick-q" onclick="askPublic('ما شبكة الواي فاي وكلمة المرور؟')">📶 الواي فاي</button>
             </div>
             <div class="ai-messages" id="aiMessages">
-              <div class="msg-bot">أهلاً! أنا وكيل سراج الذكي 🤖 يمكنك سؤالي عن أي شيء يخص Agenticthon — الجدول، المسارات، الجوائز، الفرق، أو أي استفسار آخر.</div>
+              <div class="msg-bot">✨ أهلاً بك في سِراج!<br>🤖 مساعدك الذكي في Agenticthon — AI Agents Hackathon<br><br>اختر من الأزرار أعلاه أو اكتب سؤالك مباشرة 👇</div>
+            </div>
+            <!-- Action buttons — same as Telegram callback buttons -->
+            <div class="action-btns" id="actionBtns" style="display:none;">
+              <button class="action-btn" onclick="doAction('request_mentor',this)">🆘 طلب مرشد</button>
+              <button class="action-btn" onclick="doAction('team_interest',this)">👥 اهتمامي بفريق</button>
+              <button class="action-btn" onclick="doAction('self_checkin',this)">✅ تسجيل حضوري</button>
             </div>
             <div class="ai-input-row">
               <input class="ai-input" id="publicQ" placeholder="اكتب سؤالك هنا..." onkeydown="if(event.key==='Enter')askPublic()">
-              <button class="ai-send" onclick="askPublic()" id="aiSendBtn">إرسال</button>
+              <button class="ai-send" onclick="askPublic()" id="aiSendBtn">➤</button>
             </div>
           </div>
 
@@ -653,10 +688,28 @@ function renderMd(raw) {
 
 // ═══ Session management ════════════════════════════════════════
 let sirajSessionId = localStorage.getItem('siraj_chat_session') || null;
+let knownUser = null; // { name, skill, level, team } — mirrors Telegram sess.userProfile
 
 function saveSession(id) {
   sirajSessionId = id;
   localStorage.setItem('siraj_chat_session', id);
+}
+
+// ═══ User identity — mirrors Telegram personalized greeting ════
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function updateUserIdentity(profile) {
+  if (!profile?.name || knownUser?.name === profile.name) return;
+  knownUser = profile;
+  const fn = esc(profile.name.split(' ')[0]);
+  const skill = profile.skill ? ' · ' + esc(profile.skill) : '';
+  // Update header — same as Telegram "أهلاً مجدداً *${fn}*!"
+  const header = document.getElementById('aiHeaderText');
+  header.innerHTML = `<span class="user-badge">👤 ${fn}${skill}</span>وكيل سراج — متاح 24/7`;
+  // Show action buttons — same as Telegram callback actions
+  document.getElementById('actionBtns').style.display = 'flex';
+  // Personalized greeting in chat (one time only) — mirrors Telegram greeting
+  appendMsg(`أهلاً مجدداً ${profile.name.split(' ')[0]}! 👋 كيف أساعدك اليوم؟`, 'bot');
 }
 
 // ═══ Public AI Assistant ══════════════════════════════════════
@@ -671,9 +724,11 @@ async function askPublic(preset) {
   appendMsg(q, 'user');
   const btn = document.getElementById('aiSendBtn');
   btn.disabled = true;
-  btn.textContent = '...';
+  btn.textContent = '⏳';
 
-  const thinking = appendMsg('⏳ الوكيل يفكر...', 'bot');
+  // Thinking indicator — neutral spinner (no hardcoded language)
+  const thinking = appendMsg('', 'bot');
+  thinking.innerHTML = '<span style="opacity:.5;font-style:italic;">···</span>';
 
   try {
     const res = await fetch('/api/public/ask', {
@@ -683,27 +738,32 @@ async function askPublic(preset) {
     });
     const data = await res.json();
     if (data.sessionId) saveSession(data.sessionId);
-    thinking.innerHTML = renderMd(data.answer) || 'لا يوجد رد في الوقت الحالي.';
+    // Update user identity when server identifies them (mirrors Telegram linkTelegramChat)
+    if (data.userProfile?.name) updateUserIdentity(data.userProfile);
+    thinking.innerHTML = renderMd(data.answer) || '<span style="opacity:.5">—</span>';
   } catch {
-    thinking.textContent = 'تعذّر الاتصال بالوكيل، حاول مجدداً.';
+    thinking.textContent = '⚠️';
   } finally {
     btn.disabled = false;
-    btn.textContent = 'إرسال';
+    btn.textContent = '➤';
   }
 }
 
-async function publicAction(action, data = {}) {
+// ═══ Action buttons — mirrors Telegram /api/public/action ═════
+async function doAction(action, btn) {
+  btn.disabled = true;
   try {
     const res = await fetch('/api/public/action', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action, data, sessionId: sirajSessionId })
+      body: JSON.stringify({ action, data: {}, sessionId: sirajSessionId })
     });
     const result = await res.json();
     if (result.message) appendMsg(result.success ? `✅ ${result.message}` : `❌ ${result.message}`, 'bot');
-    return result;
   } catch {
-    appendMsg('تعذّر تنفيذ الإجراء، حاول مجدداً.', 'bot');
+    appendMsg('⚠️', 'bot');
+  } finally {
+    btn.disabled = false;
   }
 }
 
