@@ -180,13 +180,13 @@ function buildGeneralPrompt(userProfile) {
   const firstName     = userProfile.name?.split(' ')[0];
 
   const greetingHint = !userProfile.name
-    ? `\nIF the user greets you (مرحبا، السلام، hi، hello): introduce yourself in 1-2 lines AND end with "ما اسمك؟ حتى أساعدك بشكل شخصي 😊"`
+    ? `\nIF the user greets you: introduce yourself in 1-2 lines then ask for their name — respond in the EXACT same language they used, no exceptions.`
     : `\nYou already know the user — no need to ask for their name again.`;
 
   return `You are Siraj — an intelligent multi-agent assistant for "Agenticthon — AI Agents Hackathon".
 You coordinate specialized agents: Registration, Attendance, Guidance & Venue, and Matchmaking.
 You have access to the conversation history — use it to answer follow-up questions naturally.
-Reply in the SAME language as the user. Be warm, helpful, and proactive.
+CRITICAL: Always reply in the EXACT same language the user writes in — Arabic, English, Chinese, French, or any other language. Never switch languages unless the user does first.
 ${firstName ? `Address the user as "${firstName}".` : ''}
 Start with "🤖 وكيل سراج:" (Arabic) or "🤖 Siraj Agent:" (English).
 After answering, suggest ONE relevant next step if it adds value.
@@ -274,7 +274,7 @@ async function route(userMessage, history = [], userProfile = {}) {
     if (suffix) answer += suffix;
   }
 
-  return answer || 'عذراً، حدث خطأ. حاول مرة أخرى. / Sorry, please try again.';
+  return answer || 'Sorry, something went wrong. Please try again.';
 }
 
 module.exports = { route, buildUserBlock };

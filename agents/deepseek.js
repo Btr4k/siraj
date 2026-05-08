@@ -26,7 +26,8 @@ async function askDeepSeek(systemPrompt, userMessage, options = {}) {
     );
     return response.data.choices[0].message.content;
   } catch (err) {
-    console.error('DeepSeek error:', err.message);
+    const detail = err.response?.data?.error?.message || err.message;
+    console.error('DeepSeek error:', detail);
     return null;
   }
 }
