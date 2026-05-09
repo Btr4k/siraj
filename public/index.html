@@ -269,6 +269,11 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);height:100vh
 .al{display:flex;align-items:center;gap:8px;background:var(--red-l);border:1px solid rgba(220,38,38,.2);border-radius:var(--rsm);padding:9px 12px;}
 .al-msg{font-size:12px;color:var(--red);flex:1;font-weight:600;}
 
+/* ── PHASE SELECTOR ─────────────────────────────── */
+.phase-btn{padding:4px 12px;border-radius:20px;border:1px solid var(--border);background:var(--sf2);color:var(--text2);font-size:11px;font-weight:700;cursor:pointer;font-family:var(--sans);transition:all .15s;}
+.phase-btn:hover{background:var(--teal-l);color:var(--teal-d);border-color:rgba(13,148,136,.3);}
+.phase-active{background:var(--teal)!important;color:#fff!important;border-color:var(--teal-d)!important;box-shadow:0 2px 6px rgba(13,148,136,.3);}
+
 /* ── BROADCAST ───────────────────────────────────── */
 .bc{position:fixed;top:0;left:0;right:0;z-index:200;display:none;background:var(--red-l);border-bottom:2px solid var(--red);padding:10px 24px;text-align:center;color:var(--red);font-size:13px;font-weight:700;box-shadow:0 4px 12px rgba(220,38,38,.15);}
 
@@ -400,6 +405,15 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);height:100vh
   <!-- ── LEFT COLUMN ── -->
   <div class="lcol">
 
+    <!-- Event Phase Selector -->
+    <div style="display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:8px 14px;flex-shrink:0;">
+      <span style="font-size:11px;font-weight:700;color:var(--text3);font-family:var(--mono);">مرحلة الحدث:</span>
+      <button id="phase-before"  class="phase-btn" onclick="setPhase('before')">قبل الفعالية</button>
+      <button id="phase-during"  class="phase-btn phase-active" onclick="setPhase('during')">أثناء الفعالية</button>
+      <button id="phase-after"   class="phase-btn" onclick="setPhase('after')">بعد الفعالية</button>
+      <span id="phase-status" style="font-size:10px;color:var(--text3);margin-right:auto;font-family:var(--mono);"></span>
+    </div>
+
     <!-- Stats -->
     <div class="stats" id="statsGrid"></div>
 
@@ -491,6 +505,29 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);height:100vh
         <span class="ch-sub ml" style="color:var(--red);font-weight:700;animation:blink 1.5s infinite;">● LIVE</span>
       </div>
       <div style="flex:1;min-height:0;overflow-y:auto;" id="feed"></div>
+    </div>
+
+    <!-- Profiles Summary -->
+    <div class="card" style="flex-shrink:0;">
+      <div class="ch">
+        <div class="ico ico-xs ico-purple">👤</div>
+        <span class="ch-title">ملفات المستخدمين</span>
+      </div>
+      <div style="padding:8px 14px;font-size:12px;" id="profilesPanel">
+        <div style="color:var(--text3);font-size:11px;">جاري التحميل...</div>
+      </div>
+    </div>
+
+    <!-- Heatmap -->
+    <div class="card" style="flex-shrink:0;">
+      <div class="ch">
+        <div class="ico ico-xs ico-green">🔥</div>
+        <span class="ch-title">توزيع القاعات</span>
+        <button onclick="doRefreshHeatmap()" class="ab ab-teal ml" style="padding:2px 8px;font-size:10px;">تحديث</button>
+      </div>
+      <div style="padding:8px 14px;" id="heatmapPanel">
+        <div style="color:var(--text3);font-size:11px;text-align:center;padding:8px;">لا بيانات حية بعد</div>
+      </div>
     </div>
 
     <!-- Alerts -->
@@ -656,11 +693,11 @@ buildStats();
 // ══ AGENTS ═══════════════════════════════════════════════════
 function buildAgents(s){
   const ag=[
-    {lbl:'وكيل التسجيل',    badge:'ico-teal',  icon:'🗂️', desc:'Track Signups · Collect Data',  val:s.registered||0,        unit:'مشارك'},
-    {lbl:'وكيل الحضور',     badge:'ico-green', icon:'✅',  desc:'Check-In · No-Show Alerts',    val:s.checkedIn||0,         unit:'حضور'},
-    {lbl:'وكيل التوجيه',    badge:'ico-amber', icon:'📍',  desc:'Guidance · Venue · Schedule',  val:s.questionsAnswered||0, unit:'سؤال'},
-    {lbl:'وكيل التطابق',    badge:'ico-purple',icon:'🤝',  desc:'Mentor Match · Team Match',    val:s.teamsFormed||0,       unit:'فريق'},
-    {lbl:'مركز الأوامر',    badge:'ico-blue',  icon:'⚡',  desc:'Data Management · Commands',   val:'جاهز',                 unit:''},
+    {lbl:'وكيل المعرفة 🧠',    badge:'ico-teal',  icon:'🧠', desc:'Knowledge · Concepts · Speakers', val:s.questionsAnswered||0, unit:'سؤال'},
+    {lbl:'وكيل العمليات ⚡',   badge:'ico-green', icon:'⚡',  desc:'Operations · Check-In · Analytics',val:s.checkedIn||0,        unit:'حضور'},
+    {lbl:'وكيل الملاحة 🧭',   badge:'ico-amber', icon:'🧭',  desc:'Navigation · Venue · Parking',    val:'جاهز',                 unit:''},
+    {lbl:'وكيل الجدول 📅',    badge:'ico-purple',icon:'📅',  desc:'Schedule · Sessions · Reminders', val:'جاهز',                 unit:''},
+    {lbl:'وكيل التواصل 🤝',   badge:'ico-blue',  icon:'🤝',  desc:'Networking · Teams · Mentors',    val:s.teamsFormed||0,       unit:'فريق'},
   ];
   document.getElementById('agentList').innerHTML=ag.map(a=>`
     <div class="ar" style="align-items:flex-start;padding:8px 0;">
@@ -699,21 +736,26 @@ function setTab(tab){
 // ══ COLORS ═══════════════════════════════════════════════════
 const TC=['#0D9488','#D97706','#7C3AED','#DC2626','#2563EB','#DB2777','#16A34A','#EA580C'];
 const ABADGE={
-  Orchestrator:     'background:var(--teal-l);color:var(--teal-d);border-color:rgba(13,148,136,.2);',
-  GuidanceAgent:    'background:var(--amber-l);color:var(--amber);border-color:rgba(217,119,6,.2);',
-  RegistrationAgent:'background:var(--teal-l);color:var(--teal-d);border-color:rgba(13,148,136,.2);',
-  AttendanceAgent:  'background:var(--green-l);color:var(--green);border-color:rgba(22,163,74,.2);',
-  MatchmakingAgent: 'background:var(--purple-l);color:var(--purple);border-color:rgba(124,58,237,.2);',
-  DataManager:      'background:var(--blue-l);color:var(--blue);border-color:rgba(37,99,235,.2);',
-  Auth:             'background:var(--purple-l);color:var(--purple);border-color:rgba(124,58,237,.2);',
-  System:           'background:var(--sf2);color:var(--text2);border-color:var(--border);',
-  Matchmaker:       'background:var(--purple-l);color:var(--purple);border-color:rgba(124,58,237,.2);',
-  Registrar:        'background:var(--teal-l);color:var(--teal-d);border-color:rgba(13,148,136,.2);',
+  Orchestrator:    'background:var(--teal-l);color:var(--teal-d);border-color:rgba(13,148,136,.2);',
+  NavigationAgent: 'background:var(--amber-l);color:var(--amber);border-color:rgba(217,119,6,.2);',
+  ScheduleAgent:   'background:var(--purple-l);color:var(--purple);border-color:rgba(124,58,237,.2);',
+  NetworkingAgent: 'background:var(--blue-l);color:var(--blue);border-color:rgba(37,99,235,.2);',
+  KnowledgeAgent:  'background:var(--teal-l);color:var(--teal-d);border-color:rgba(13,148,136,.2);',
+  OperationsAgent: 'background:var(--green-l);color:var(--green);border-color:rgba(22,163,74,.2);',
+  // Legacy agent names (kept for backward-compat with old log entries)
+  GuidanceAgent:   'background:var(--amber-l);color:var(--amber);border-color:rgba(217,119,6,.2);',
+  MatchmakingAgent:'background:var(--purple-l);color:var(--purple);border-color:rgba(124,58,237,.2);',
+  DataManager:     'background:var(--blue-l);color:var(--blue);border-color:rgba(37,99,235,.2);',
+  Auth:            'background:var(--purple-l);color:var(--purple);border-color:rgba(124,58,237,.2);',
+  System:          'background:var(--sf2);color:var(--text2);border-color:var(--border);',
+  PublicAction:    'background:var(--green-l);color:var(--green);border-color:rgba(22,163,74,.2);',
+  Dashboard:       'background:var(--blue-l);color:var(--blue);border-color:rgba(37,99,235,.2);',
 };
 const ALBL={
-  Orchestrator:'منسّق',GuidanceAgent:'توجيه',RegistrationAgent:'تسجيل',
-  AttendanceAgent:'حضور',MatchmakingAgent:'تطابق',
-  DataManager:'أوامر',Auth:'دخول',System:'نظام',Matchmaker:'تطابق',Registrar:'تسجيل'
+  Orchestrator:'منسّق', NavigationAgent:'ملاحة', ScheduleAgent:'جدول',
+  NetworkingAgent:'تواصل', KnowledgeAgent:'معرفة', OperationsAgent:'عمليات',
+  GuidanceAgent:'توجيه', MatchmakingAgent:'تطابق',
+  DataManager:'أوامر', Auth:'دخول', System:'نظام', PublicAction:'إجراء', Dashboard:'لوحة'
 };
 
 // ══ FETCH ════════════════════════════════════════════════════
@@ -772,6 +814,29 @@ function renderUI(d){
         <div style="font-size:13px;">${t('noTeams')}</div>
       </div>`;
 
+  // event phase sync
+  if(d.eventPhase){
+    ['before','during','after'].forEach(p=>{
+      const btn=document.getElementById(`phase-${p}`);
+      if(btn)btn.className='phase-btn'+(p===d.eventPhase?' phase-active':'');
+    });
+  }
+
+  // profiles summary
+  if(d.profilesSummary){
+    const ps=d.profilesSummary;
+    const panel=document.getElementById('profilesPanel');
+    if(panel){
+      panel.innerHTML=`
+        <div style="display:flex;gap:16px;margin-bottom:6px;">
+          <div><div style="font-size:18px;font-weight:700;font-family:var(--mono);">${ps.total}</div><div style="font-size:10px;color:var(--text3);">ملف مسجل</div></div>
+          <div><div style="font-size:12px;font-weight:700;">${(ps.langCounts.ar||0)} AR / ${(ps.langCounts.en||0)} EN</div><div style="font-size:10px;color:var(--text3);">لغات</div></div>
+        </div>
+        ${ps.topInterests.length>0?`<div style="font-size:10px;color:var(--text3);margin-bottom:4px;">أبرز الاهتمامات:</div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;">${ps.topInterests.map(i=>`<span class="pill p-teal">${esc(i)}</span>`).join('')}</div>`:''}`;
+    }
+  }
+
   // feed
   if(d.activityLog.length>0){
     document.getElementById('feed').innerHTML=d.activityLog.slice(0,15).map((item,i)=>{
@@ -787,6 +852,45 @@ function renderUI(d){
       </div>`;
     }).join('');
   }
+}
+
+// ══ EVENT PHASE ══════════════════════════════════════════════
+async function setPhase(phase){
+  const r=await apiFetch('/api/event-phase',{method:'POST',body:JSON.stringify({phase})});
+  if(!r)return;
+  ['before','during','after'].forEach(p=>{
+    const btn=document.getElementById(`phase-${p}`);
+    if(btn)btn.className='phase-btn'+(p===phase?' phase-active':'');
+  });
+  const labels={before:'قبل الفعالية',during:'أثناء الفعالية',after:'بعد الفعالية'};
+  const st=document.getElementById('phase-status');
+  if(st)st.textContent='✓ '+labels[phase];
+}
+
+// ══ HEATMAP ══════════════════════════════════════════════════
+async function doRefreshHeatmap(){
+  const r=await apiFetch('/api/operations/heatmap');
+  if(!r)return;
+  const data=await r.json();
+  const panel=document.getElementById('heatmapPanel');
+  if(!panel)return;
+  if(!data.halls||data.halls.length===0){
+    panel.innerHTML='<div style="color:var(--text3);font-size:11px;text-align:center;padding:8px;">لا بيانات حية</div>';
+    return;
+  }
+  const max=Math.max(...data.halls.map(h=>h.count),1);
+  panel.innerHTML=data.halls.map(h=>{
+    const pct=Math.round(h.count/max*100);
+    return `<div style="margin-bottom:7px;">
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px;">
+        <span style="font-weight:700;color:var(--text);">${esc(h.hall)}</span>
+        <span style="font-family:var(--mono);color:var(--text2);">${h.count}</span>
+      </div>
+      <div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
+        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--teal),var(--amber));border-radius:3px;"></div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 // ══ ACTIONS ══════════════════════════════════════════════════

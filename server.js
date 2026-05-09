@@ -15,6 +15,9 @@ const { pushToChat } = require('./agents/notifier');
 const { MAIN_MENU, BACK_BTN, getWelcomeText, handleCallback, setCommands } = require('./agents/telegram');
 const onboarding = require('./agents/onboarding');
 const { processCommand }                                 = require('./agents/dataManager');
+const { loadProfiles }                                   = require('./data/profiles');
+const { getHeatmap, generateSummary, getPopularSessions } = require('./agents/operations');
+const { tryAction }                                      = require('./agents/actions');
 
 const sessions    = new Map(); // admin token → { expiresAt }
 const SESSION_TTL = 8 * 60 * 60 * 1000;
@@ -105,6 +108,9 @@ function authMiddleware(req, res, next) {
 const app  = express();
 const PORT = process.env.PORT || 3000;
 const TG   = `https://api.telegram.org/bot${process.env.TELEGRAM_TOKEN}`;
+
+// Trust reverse proxy (Nginx/Caddy) so rate-limit reads the real client IP
+app.set('trust proxy', 1);
 
 // CORS: allow only same-origin for admin endpoints; public endpoints are open
 app.use('/api/public', cors());
@@ -327,10 +333,18 @@ app.post('/webhook', async (req, res) => {
   }
 
   const { sid, sess } = getOrCreateChatSession(String(chatId));
+
+  // ── Real actions (mutate state) — checked BEFORE LLM routing ──
+  const action = await tryAction(text, chatId, sess.userProfile);
+  if (action) {
+    await sendTelegram(chatId, action.msg, BACK_BTN);
+    return;
+  }
+
   const history = [...sess.messages];
   sess.messages.push({ role: 'user', content: text });
 
-  const reply = await route(text, history, sess.userProfile);
+  const reply = await route(text, history, sess.userProfile, String(chatId));
 
   if (reply) sess.messages.push({ role: 'assistant', content: reply });
   if (sess.messages.length > 16) sess.messages = sess.messages.slice(-16);
@@ -344,6 +358,13 @@ app.post('/webhook', async (req, res) => {
 });
 
 app.get('/api/state', authMiddleware, (req, res) => {
+  const { profiles } = require('./data/profiles');
+  const allProfiles  = Array.from(profiles.values());
+  const langCounts   = allProfiles.reduce((acc, p) => { acc[p.language || 'ar'] = (acc[p.language || 'ar'] || 0) + 1; return acc; }, {});
+  const interestCounts = {};
+  allProfiles.forEach(p => (p.interests || []).forEach(i => { interestCounts[i] = (interestCounts[i] || 0) + 1; }));
+  const topInterests = Object.entries(interestCounts).sort((a,b) => b[1]-a[1]).slice(0,3).map(([k]) => k);
+
   res.json({
     stats:       state.stats,
     activityLog: state.activityLog.slice(0, 15),
@@ -351,7 +372,14 @@ app.get('/api/state', authMiddleware, (req, res) => {
     teams:       state.teams,
     attendees:   state.attendees,
     mentors:     state.mentors,
-    schedule:    state.schedule
+    schedule:    state.schedule,
+    eventPhase:  state.eventPhase,
+    hallCounts:  state.hallCounts,
+    profilesSummary: {
+      total:        allProfiles.length,
+      topInterests,
+      langCounts
+    }
   });
 });
 
@@ -394,7 +422,33 @@ app.post('/api/admin/command', authMiddleware, async (req, res) => {
   res.json(result);
 });
 
+// ── Event phase control ─────────────────────────────────────────
+app.post('/api/event-phase', authMiddleware, (req, res) => {
+  const { phase } = req.body || {};
+  if (!['before', 'during', 'after'].includes(phase)) {
+    return res.status(400).json({ error: 'invalid phase — use before|during|after' });
+  }
+  state.eventPhase = phase;
+  logActivity('Dashboard', 'تغيير مرحلة الحدث', phase);
+  res.json({ ok: true, phase });
+});
+
+// ── Operations endpoints (organizer-only) ───────────────────────
+app.get('/api/operations/heatmap', authMiddleware, (req, res) => {
+  res.json(getHeatmap());
+});
+
+app.post('/api/operations/summary', authMiddleware, async (req, res) => {
+  const summary = await generateSummary();
+  res.json({ summary });
+});
+
+app.get('/api/operations/popular-sessions', authMiddleware, (req, res) => {
+  res.json(getPopularSessions());
+});
+
 app.listen(PORT, () => {
+  loadProfiles();
   console.log(`\n🚀 Siraj running on port ${PORT}`);
   console.log(`📊 Dashboard: http://localhost:${PORT}`);
   logActivity('System', 'بدأ النظام', 'جميع الـ agents جاهزون');

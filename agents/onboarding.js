@@ -1,33 +1,47 @@
-const { state, addAttendee, linkTelegramChat } = require('../data/state');
+const { state, linkTelegramChat } = require('../data/state');
+const { getOrCreateProfile, updateProfile } = require('../data/profiles');
 const { MAIN_MENU, BACK_BTN } = require('./telegram');
 
-// chatId → { step: 'name'|'skill'|'level'|'goal', data: {} }
+// chatId → { step: 'name_role'|'interests'|'goal' }
 const pending = new Map();
 
 // ── Keyboards ──────────────────────────────────────────────────
-const SKILL_KB = {
+
+const ROLE_KB = {
   inline_keyboard: [
-    [{ text: '🤖 AI Engineer',    callback_data: 'ob_skill_AI Engineer'    }, { text: '⚙️ Backend Dev',   callback_data: 'ob_skill_Backend Dev'   }],
-    [{ text: '🎨 Frontend Dev',   callback_data: 'ob_skill_Frontend Dev'   }, { text: '✏️ UX Designer',   callback_data: 'ob_skill_UX Designer'   }],
-    [{ text: '📊 Data Scientist', callback_data: 'ob_skill_Data Scientist' }, { text: '💼 Business Dev',  callback_data: 'ob_skill_Business Dev'  }],
-    [{ text: '🔧 DevOps',         callback_data: 'ob_skill_DevOps'         }]
+    [
+      { text: '🎓 مشارك',  callback_data: 'ob_role_attendee'  },
+      { text: '🏅 منظم',   callback_data: 'ob_role_organizer' }
+    ],
+    [
+      { text: '🎤 متحدث',  callback_data: 'ob_role_speaker'   }
+    ]
   ]
 };
 
-const LEVEL_KB = {
-  inline_keyboard: [[
-    { text: '🌱 مبتدئ', callback_data: 'ob_level_مبتدئ' },
-    { text: '⚡ متوسط', callback_data: 'ob_level_متوسط' },
-    { text: '🔥 متقدم', callback_data: 'ob_level_متقدم' }
-  ]]
+const INTEREST_KB = {
+  inline_keyboard: [
+    [{ text: '🤖 AI Agents',    callback_data: 'ob_int_AI Agents'    }, { text: '🔒 Security',      callback_data: 'ob_int_Security'     }],
+    [{ text: '🧠 NLP',          callback_data: 'ob_int_NLP'          }, { text: '📊 Data Science',  callback_data: 'ob_int_Data Science' }],
+    [{ text: '📦 Product',      callback_data: 'ob_int_Product'      }, { text: '💼 Business',      callback_data: 'ob_int_Business'     }],
+    [{ text: '⚙️ DevOps',       callback_data: 'ob_int_DevOps'       }, { text: '✅ تم الاختيار',   callback_data: 'ob_int_done'         }]
+  ]
 };
 
 const GOAL_KB = {
-  inline_keyboard: [[
-    { text: '📚 تعلم',         callback_data: 'ob_goal_تعلم'         },
-    { text: '💼 توظيف',        callback_data: 'ob_goal_توظيف'        },
-    { text: '🚀 بناء مشروع',   callback_data: 'ob_goal_بناء مشروع'   }
-  ]]
+  inline_keyboard: [
+    [
+      { text: '📚 تعلم',          callback_data: 'ob_goal_learn'     },
+      { text: '🚀 بناء مشروع',    callback_data: 'ob_goal_build'     }
+    ],
+    [
+      { text: '🤝 تواصل',         callback_data: 'ob_goal_network'   },
+      { text: '👔 توظيف',         callback_data: 'ob_goal_hire'      }
+    ],
+    [
+      { text: '💼 أبحث عن عمل',   callback_data: 'ob_goal_get_hired' }
+    ]
+  ]
 };
 
 // ── Public API ─────────────────────────────────────────────────
@@ -37,38 +51,64 @@ function isOnboarding(chatId) {
 }
 
 async function startOnboarding(chatId, sendFn) {
-  pending.set(String(chatId), { step: 'name', data: {} });
+  const cid = String(chatId);
+  pending.set(cid, { step: 'name_role', interestsBuffer: [] });
   await sendFn(chatId,
-    '👋 *أهلاً بك في Agenticthon\\!*\n\n' +
-    'أنا وكيل *سِراج* — مساعدك الذكي طوال الهاكاثون\\.\n\n' +
-    'سأسجّلك في ٣٠ ثانية فقط ⚡\n\n' +
-    '*ما اسمك الكامل؟*'
+    '👋 *أهلاً بك في Agenticthon!*\n\n' +
+    'أنا وكيل *سِراج* — مساعدك الذكي طوال الهاكاثون.\n\n' +
+    '*ما اسمك الكامل؟* (مثال: عبدالله العتيبي)'
   );
 }
 
-// Returns true if message was consumed by onboarding
+// Name validation: must contain real letters (Arabic or Latin), min 2 words, max 50 chars
+const NAME_RE = /^[؀-ۿa-zA-Z][؀-ۿa-zA-Z\s]{2,48}[؀-ۿa-zA-Z]$/;
+function isValidName(name) {
+  if (!NAME_RE.test(name)) return false;
+  const words = name.trim().split(/\s+/).filter(w => w.length > 0);
+  return words.length >= 2; // require at least first + last name
+}
+
+// Returns true if text was consumed by onboarding
 async function handleText(chatId, text, sendFn) {
   const cid = String(chatId);
   const ob  = pending.get(cid);
-  if (!ob || ob.step !== 'name') return false;
+  if (!ob || ob.step !== 'name_role') return false;
 
   const name = text.trim();
-  if (name.length < 2 || name.length > 40) {
-    await sendFn(chatId, '⚠️ الاسم يبدو قصيراً أو غير صحيح\\. أدخل اسمك الكامل من فضلك\\.');
+  if (!isValidName(name)) {
+    await sendFn(chatId,
+      '⚠️ يرجى إدخال اسمك الكامل (الاسم والكنية على الأقل).\n' +
+      'مثال: *عبدالله العتيبي*'
+    );
     return true;
   }
 
-  // Check if name already exists in attendees list → link and skip
-  const existing = state.attendees.find(a =>
-    a.name.includes(name) || name.includes(a.name.split(' ')[0])
-  );
+  // Check if name matches existing attendee — strict full-name match only
+  const existing = state.attendees.find(a => {
+    const aParts = a.name.trim().split(/\s+/);
+    const nParts = name.trim().split(/\s+/);
+    const matched = nParts.filter(w => aParts.some(ap => ap === w)).length;
+    return matched >= 2;
+  });
+
+  ob.name = name;
+
   if (existing) {
-    pending.delete(cid);
+    // Link attendee and pre-fill profile from existing record
     linkTelegramChat(existing.id, cid);
+    updateProfile(cid, {
+      name:      existing.name,
+      role:      'attendee',
+      interests: [existing.skill],
+      goal:      existing.goal || 'learn',
+      language:  'ar',
+      attendeeId: existing.id
+    });
+    pending.delete(cid);
     const fn = existing.name.split(' ')[0];
     await sendFn(chatId,
-      `أهلاً مجدداً *${fn}*\\! 🎉\n` +
-      `وجدتك في سجلات الهاكاثون\\.\n\n` +
+      `أهلاً مجدداً *${fn}*\! 🎉\n` +
+      `وجدتك في سجلات الهاكاثون\.\n\n` +
       `💻 *تخصصك:* ${existing.skill}\n` +
       `📊 *مستواك:* ${existing.level}\n` +
       `🎯 *هدفك:* ${existing.goal}\n\n` +
@@ -78,12 +118,11 @@ async function handleText(chatId, text, sendFn) {
     return true;
   }
 
-  ob.data.name = name;
-  ob.step = 'skill';
+  ob.step = 'role_select';
   const firstName = name.split(' ')[0];
   await sendFn(chatId,
-    `أهلاً *${firstName}*\\! 🎉\n\n*ما تخصصك؟*`,
-    SKILL_KB
+    `أهلاً *${firstName}*\! 🎉\n\n*ما دورك في الهاكاثون؟*`,
+    ROLE_KB
   );
   return true;
 }
@@ -94,39 +133,69 @@ async function handleCallback(chatId, data, sendFn) {
   const ob  = pending.get(cid);
   if (!ob) return false;
 
-  if (data.startsWith('ob_skill_') && ob.step === 'skill') {
-    ob.data.skill = data.replace('ob_skill_', '');
-    ob.step = 'level';
-    await sendFn(chatId, `✅ *${ob.data.skill}*\n\n*ما مستواك؟*`, LEVEL_KB);
+  // Step: role selection
+  if (data.startsWith('ob_role_') && ob.step === 'role_select') {
+    ob.role = data.replace('ob_role_', '');
+    ob.step = 'interests';
+    const roleLabel = { attendee: 'مشارك', organizer: 'منظم', speaker: 'متحدث' }[ob.role] || ob.role;
+    await sendFn(chatId,
+      `✅ *${roleLabel}*\n\n*ما اهتماماتك؟ يمكنك اختيار أكثر من واحد\.*\n_اضغط "تم الاختيار" عند الانتهاء_`,
+      INTEREST_KB
+    );
     return true;
   }
 
-  if (data.startsWith('ob_level_') && ob.step === 'level') {
-    ob.data.level = data.replace('ob_level_', '');
-    ob.step = 'goal';
-    await sendFn(chatId, `✅ *${ob.data.level}*\n\n*ما هدفك من الهاكاثون؟*`, GOAL_KB);
+  // Step: interests (multi-select via buffer, done via ob_int_done)
+  if (data.startsWith('ob_int_') && ob.step === 'interests') {
+    if (data === 'ob_int_done') {
+      if (ob.interestsBuffer.length === 0) {
+        await sendFn(chatId, '⚠️ اختر اهتماماً واحداً على الأقل\.', INTEREST_KB);
+        return true;
+      }
+      ob.step = 'goal';
+      await sendFn(chatId,
+        `✅ *${ob.interestsBuffer.join(' • ')}*\n\n*ما هدفك من الهاكاثون؟*`,
+        GOAL_KB
+      );
+    } else {
+      const interest = data.replace('ob_int_', '');
+      if (!ob.interestsBuffer.includes(interest)) ob.interestsBuffer.push(interest);
+      await sendFn(chatId,
+        `✅ أضفت: *${interest}*\nالاهتمامات: _${ob.interestsBuffer.join(' • ')}_\n\nاختر المزيد أو اضغط "تم الاختيار"\.`,
+        INTEREST_KB
+      );
+    }
     return true;
   }
 
+  // Step: goal
   if (data.startsWith('ob_goal_') && ob.step === 'goal') {
-    ob.data.goal = data.replace('ob_goal_', '');
+    const goalRaw = data.replace('ob_goal_', '');
+    const goalLabels = {
+      learn: 'تعلم', build: 'بناء مشروع', network: 'تواصل',
+      hire: 'توظيف', get_hired: 'أبحث عن عمل'
+    };
+    const goalLabel = goalLabels[goalRaw] || goalRaw;
+
+    // Detect language from name (simple heuristic: Arabic chars → ar)
+    const language = /[؀-ۿ]/.test(ob.name) ? 'ar' : 'en';
+
+    updateProfile(cid, {
+      name:      ob.name,
+      role:      ob.role,
+      interests: ob.interestsBuffer,
+      goal:      goalRaw,
+      language,
+      attendeeId: null
+    });
     pending.delete(cid);
 
-    const result = addAttendee(ob.data);
-    if (!result.success) {
-      await sendFn(chatId, '⚠️ حدث خطأ أثناء التسجيل\\. حاول مرة أخرى أو تواصل مع المنظمين\\.', BACK_BTN);
-      return true;
-    }
-
-    linkTelegramChat(result.attendee.id, cid);
-    const fn = ob.data.name.split(' ')[0];
-
+    const fn = ob.name.split(' ')[0];
     await sendFn(chatId,
-      `🎉 *تم تسجيلك يا ${fn}\\!*\n\n` +
-      `👤 *الاسم:* ${ob.data.name}\n` +
-      `💻 *التخصص:* ${ob.data.skill}\n` +
-      `📊 *المستوى:* ${ob.data.level}\n` +
-      `🎯 *الهدف:* ${ob.data.goal}\n\n` +
+      `🎉 *أهلاً ${fn}!* تم إعداد ملفك الشخصي.\n\n` +
+      `🎭 *الدور:* ${{ attendee: 'مشارك', organizer: 'منظم', speaker: 'متحدث' }[ob.role] || ob.role}\n` +
+      `💡 *الاهتمامات:* ${ob.interestsBuffer.join(' • ')}\n` +
+      `🎯 *الهدف:* ${goalLabel}\n\n` +
       `_يمكنك الآن سؤالي عن الجدول، الفرق، المرشدين، أو أي شيء آخر 👇_`,
       MAIN_MENU
     );

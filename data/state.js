@@ -10,6 +10,8 @@ const state = {
   activityLog: [],
   alerts: [],
   telegramUsers: [], // { telegramId, name? } — collected from webhook
+  eventPhase: 'during',  // 'before' | 'during' | 'after'
+  hallCounts: {},        // { 'الصالة الرياضية': 12, 'قاعات العمل': 8 }
   stats: {
     registered: attendees.length,
     checkedIn: 0,

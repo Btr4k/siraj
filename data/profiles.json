@@ -1,0 +1,57 @@
+{
+  "000000": {
+    "name": null,
+    "role": null,
+    "interests": [],
+    "goal": null,
+    "language": "ar",
+    "attendedSessions": [],
+    "connectionsMade": [],
+    "attendeeId": null,
+    "createdAt": "2026-05-08T16:40:53.507Z"
+  },
+  "000001": {
+    "name": null,
+    "role": null,
+    "interests": [],
+    "goal": null,
+    "language": "ar",
+    "attendedSessions": [],
+    "connectionsMade": [],
+    "attendeeId": null,
+    "createdAt": "2026-05-08T16:40:53.509Z"
+  },
+  "000002": {
+    "name": null,
+    "role": null,
+    "interests": [],
+    "goal": null,
+    "language": "ar",
+    "attendedSessions": [],
+    "connectionsMade": [],
+    "attendeeId": null,
+    "createdAt": "2026-05-08T16:40:53.551Z"
+  },
+  "000003": {
+    "name": null,
+    "role": null,
+    "interests": [],
+    "goal": null,
+    "language": "ar",
+    "attendedSessions": [],
+    "connectionsMade": [],
+    "attendeeId": null,
+    "createdAt": "2026-05-08T16:40:53.551Z"
+  },
+  "000004": {
+    "name": null,
+    "role": null,
+    "interests": [],
+    "goal": null,
+    "language": "ar",
+    "attendedSessions": [],
+    "connectionsMade": [],
+    "attendeeId": null,
+    "createdAt": "2026-05-08T16:40:53.556Z"
+  }
+}
